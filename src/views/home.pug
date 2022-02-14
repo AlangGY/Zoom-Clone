@@ -11,4 +11,17 @@ html(lang="en")
       h1 Zoom 
     main 
       h3 Welcome To Zoom!
+      h4 내 ID 
+      h5#my-id
+      article
+        h4 접속자
+        ul.clients
+      form#nickname
+        h4 닉네임: Loading... 
+        input(type="text", name="nick" placeholder="닉네임을 정하세요" required)
+        button 저장하기
+      form#chat
+        input(type="text", name="chat" placeholder="메시지를 입력하세요" required)
+        button 전송하기
+      ul.chats
     script(src="/public/js/app.js")
