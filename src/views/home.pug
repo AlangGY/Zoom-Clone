@@ -13,19 +13,21 @@ html(lang="en")
       #nickname 
         form
           h3 닉네임: 
-            span 로딩중 💬
+            span 닉네임을 입력하세요
           input(type="text", name="nickname", placeholder="닉네임을 입력하세요", required)
           button 설정
       #room 
         form
           h3 방 제목: 
-            span 
+            span 방제목을 입력하세요
           input(type="text", name="room", placeholder="방 제목을 입력하세요", required)
           button 입장
+        h4.roomList 방 목록
+          ul
       #chat
         form
           ul 
-          h3 채팅방: 
+          h3 채팅방
             span
           input(type="text", name="chat", placeholder="메시지를 입력하세요", required)
           button 전송
