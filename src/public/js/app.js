@@ -28,6 +28,22 @@ const newChat = ({ prefix, chat }) => {
   ul.appendChild(li);
 };
 
+// socket emit
+const emitChangeRoom = (room) => {
+  const prevRoom = currentRoom;
+  if (prevRoom) {
+    socket.emit("leave_room", { room: prevRoom }, () => {
+      console.log(`left Room: ${prevRoom}`);
+    });
+  }
+
+  socket.emit("enter_room", { room }, () => {
+    console.log(`entered Room: ${room}`);
+    enterRoom(room);
+    currentRoom = room;
+  });
+};
+
 // Event Handler
 const handleNicknameSubmit = (e) => {
   e.preventDefault();
@@ -43,20 +59,10 @@ const handleNicknameSubmit = (e) => {
 
 const handleRoomSubmit = (e) => {
   e.preventDefault();
-  const prevRoom = currentRoom;
   const input = $roomForm.querySelector("input");
   const room = input.value;
-  if (prevRoom) {
-    socket.emit("leave_room", { room: prevRoom }, () => {
-      console.log(`left Room: ${prevRoom}`);
-    });
-  }
+  emitChangeRoom(room);
 
-  socket.emit("enter_room", { room }, () => {
-    console.log(`entered Room: ${room}`);
-    enterRoom(room);
-    currentRoom = room;
-  });
   input.value = "";
 };
 
@@ -109,6 +115,12 @@ socket.on("room_list", ({ roomList: newRoomList }) => {
   `;
 });
 
+const handleChangeRoom = (e) => {
+  const room = e.target?.dataset.id;
+  if (room) {
+    emitChangeRoom(room);
+  }
+};
 
 $roomList.addEventListener("click", handleChangeRoom);
 $chatForm.addEventListener("submit", handleChatSubmit);
