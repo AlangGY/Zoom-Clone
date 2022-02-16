@@ -21,7 +21,6 @@ io.on("connection", (socket) => {
   const sendRoomList = () => {
     const { rooms, sids } = socket.adapter;
     const publicRooms = getPublicRooms([...rooms], sids);
-    // roomsIter.filter(())
     io.emit("room_list", { roomList: publicRooms });
   };
 
@@ -70,7 +69,6 @@ io.on("connection", (socket) => {
   });
 
   socket.on("new_chat", ({ chat, room }, done) => {
-    console.log(chat, room, socket["__nickname"]);
     socket.to(room).emit("new_chat", { nickname: socket["__nickname"], chat });
     done?.();
   });

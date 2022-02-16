@@ -97,6 +97,7 @@ const handleChatSubmit = (e) => {
   socket.emit("new_chat", { chat, room: currentRoomProxy.room }, () => {
     console.log(`chat sent successfully: ${chat}`);
   });
+  newChat({ prefix: "나 : ", chat });
   input.value = "";
 };
 
@@ -149,7 +150,7 @@ const handleChangeRoom = (e) => {
 const handleLeaveRoom = () => {
   emitLeaveRoom();
   currentRoomProxy.room = null;
-  showRoomTitle("");
+  showRoomTitle("입장한 방 없음");
 };
 
 $roomList.addEventListener("click", handleChangeRoom);
