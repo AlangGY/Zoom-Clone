@@ -1,27 +1,28 @@
 const socket = io();
 
-const room = document.querySelector("#room");
-const nickname = document.querySelector("#nickname");
-const chat = document.querySelector("#chat");
-const nicknameForm = nickname.querySelector("form");
-const roomForm = room.querySelector("form");
-const chatForm = chat.querySelector("form");
+const $room = document.querySelector("#room");
+const $nickname = document.querySelector("#nickname");
+const $chat = document.querySelector("#chat");
+const $nicknameForm = $nickname.querySelector("form");
+const $roomForm = $room.querySelector("form");
+const $chatForm = $chat.querySelector("form");
+const $roomList = $room.querySelector(".roomList ul");
 
 let currentRoom;
 let roomList = [];
 
 const changeNickname = (nickname) => {
-  const nicknameSpan = nicknameForm.querySelector("h3 span");
+  const nicknameSpan = $nicknameForm.querySelector("h3 span");
   nicknameSpan.textContent = nickname;
 };
 
 const enterRoom = (room) => {
-  const roomSpan = roomForm.querySelector("h3 span");
+  const roomSpan = $roomForm.querySelector("h3 span");
   roomSpan.textContent = room;
 };
 
 const newChat = ({ prefix, chat }) => {
-  const ul = chatForm.querySelector("ul");
+  const ul = $chatForm.querySelector("ul");
   const li = document.createElement("li");
   li.textContent = `${prefix || ""}${chat}`;
   ul.appendChild(li);
@@ -30,7 +31,7 @@ const newChat = ({ prefix, chat }) => {
 // Event Handler
 const handleNicknameSubmit = (e) => {
   e.preventDefault();
-  const input = nicknameForm.querySelector("input");
+  const input = $nicknameForm.querySelector("input");
   const nickname = input.value;
   socket.emit("change_nickname", { nickname }, () => {
     console.log("change nickname!");
@@ -42,8 +43,8 @@ const handleNicknameSubmit = (e) => {
 
 const handleRoomSubmit = (e) => {
   e.preventDefault();
-  const input = roomForm.querySelector("input");
   const prevRoom = currentRoom;
+  const input = $roomForm.querySelector("input");
   const room = input.value;
   if (prevRoom) {
     socket.emit("leave_room", { room: prevRoom }, () => {
@@ -61,7 +62,7 @@ const handleRoomSubmit = (e) => {
 
 const handleChatSubmit = (e) => {
   e.preventDefault();
-  const input = chatForm.querySelector("input");
+  const input = $chatForm.querySelector("input");
   const chat = input.value;
   socket.emit("new_chat", { chat, room: currentRoom }, () => {
     console.log(`chat sent successfully: ${chat}`);
@@ -98,7 +99,6 @@ socket.on("new_chat", ({ chat, nickname }) => {
 socket.on("room_list", ({ roomList: newRoomList }) => {
   roomList = newRoomList;
   console.log(newRoomList);
-  const $roomList = room.querySelector(".roomList");
   $roomList.innerHTML = `
     ${roomList
       .map(
@@ -109,6 +109,8 @@ socket.on("room_list", ({ roomList: newRoomList }) => {
   `;
 });
 
-chatForm.addEventListener("submit", handleChatSubmit);
-nicknameForm.addEventListener("submit", handleNicknameSubmit);
-roomForm.addEventListener("submit", handleRoomSubmit);
+
+$roomList.addEventListener("click", handleChangeRoom);
+$chatForm.addEventListener("submit", handleChatSubmit);
+$nicknameForm.addEventListener("submit", handleNicknameSubmit);
+$roomForm.addEventListener("submit", handleRoomSubmit);
