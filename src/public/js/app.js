@@ -7,8 +7,8 @@ const $nicknameForm = $nickname.querySelector("form");
 const $roomForm = $room.querySelector("form");
 const $chatForm = $chat.querySelector("form");
 const $roomList = $room.querySelector(".roomList ul");
+const $leaveButton = $roomForm.querySelector(".leaveButton");
 
-let currentRoom;
 const showLeaveButton = () => {
   $leaveButton.classList.remove("displayNone");
 };
@@ -37,7 +37,7 @@ const changeNickname = (nickname) => {
   nicknameSpan.textContent = nickname;
 };
 
-const enterRoom = (room) => {
+const showRoomTitle = (room) => {
   const roomSpan = $roomForm.querySelector("h3 span");
   roomSpan.textContent = room;
 };
@@ -50,18 +50,21 @@ const newChat = ({ prefix, chat }) => {
 };
 
 // socket emit
-const emitChangeRoom = (room) => {
-  const prevRoom = currentRoom;
-  if (prevRoom) {
-    socket.emit("leave_room", { room: prevRoom }, () => {
-      console.log(`left Room: ${prevRoom}`);
+const emitLeaveRoom = () => {
+  const room = currentRoomProxy.room;
+  if (room) {
+    socket.emit("leave_room", { room }, () => {
+      console.log(`left Room: ${room}`);
     });
   }
+};
 
+const emitChangeRoom = (room) => {
+  emitLeaveRoom();
   socket.emit("enter_room", { room }, () => {
     console.log(`entered Room: ${room}`);
-    enterRoom(room);
-    currentRoom = room;
+    showRoomTitle(room);
+    currentRoomProxy.room = room;
   });
 };
 
@@ -91,7 +94,7 @@ const handleChatSubmit = (e) => {
   e.preventDefault();
   const input = $chatForm.querySelector("input");
   const chat = input.value;
-  socket.emit("new_chat", { chat, room: currentRoom }, () => {
+  socket.emit("new_chat", { chat, room: currentRoomProxy.room }, () => {
     console.log(`chat sent successfully: ${chat}`);
   });
   input.value = "";
@@ -143,7 +146,14 @@ const handleChangeRoom = (e) => {
   }
 };
 
+const handleLeaveRoom = () => {
+  emitLeaveRoom();
+  currentRoomProxy.room = null;
+  showRoomTitle("");
+};
+
 $roomList.addEventListener("click", handleChangeRoom);
 $chatForm.addEventListener("submit", handleChatSubmit);
 $nicknameForm.addEventListener("submit", handleNicknameSubmit);
 $roomForm.addEventListener("submit", handleRoomSubmit);
+$leaveButton.addEventListener("click", handleLeaveRoom);
