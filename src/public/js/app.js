@@ -9,6 +9,27 @@ const $chatForm = $chat.querySelector("form");
 const $roomList = $room.querySelector(".roomList ul");
 
 let currentRoom;
+const showLeaveButton = () => {
+  $leaveButton.classList.remove("displayNone");
+};
+
+const hideLeaveButton = () => {
+  $leaveButton.classList.add("displayNone");
+};
+
+const currentRoomProxy = new Proxy(
+  { room: null },
+  {
+    set(target, key, value) {
+      target[key] = value;
+      if (value) {
+        showLeaveButton();
+      } else {
+        hideLeaveButton();
+      }
+    },
+  }
+);
 let roomList = [];
 
 const changeNickname = (nickname) => {
