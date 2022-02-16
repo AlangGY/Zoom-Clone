@@ -8,6 +8,7 @@ const roomForm = room.querySelector("form");
 const chatForm = chat.querySelector("form");
 
 let currentRoom;
+let roomList = [];
 
 const changeNickname = (nickname) => {
   const nicknameSpan = nicknameForm.querySelector("h3 span");
@@ -92,6 +93,20 @@ socket.on("announce", ({ type, nickname, prevNickname }) => {
 socket.on("new_chat", ({ chat, nickname }) => {
   console.log(chat, nickname);
   newChat({ prefix: `${nickname} : `, chat });
+});
+
+socket.on("room_list", ({ roomList: newRoomList }) => {
+  roomList = newRoomList;
+  console.log(newRoomList);
+  const $roomList = room.querySelector(".roomList");
+  $roomList.innerHTML = `
+    ${roomList
+      .map(
+        ({ room, participants }) =>
+          `<li data-id="${room}">방 : ${room} | 참가자 수 : ${participants.length}</li>`
+      )
+      .join("")}
+  `;
 });
 
 chatForm.addEventListener("submit", handleChatSubmit);
