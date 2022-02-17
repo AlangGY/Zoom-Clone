@@ -1,43 +1,37 @@
 import Component from "../Component.template.js";
 
 class Input extends Component {
-  #onInput;
-  #handleInput = (e) => {
-    const value = e.target.value;
-    this.setState({ value });
-    this.#onInput?.(value);
-    this.clearEvent();
-  };
-
-  constructor(
-    $target,
-    { initialState = { placeholder: "", value: "", type: "text" }, onInput }
-  ) {
+  constructor($target, { initialState, onInput }) {
     super($target, initialState);
-    this.node = document.createDocumentFragment();
-    this.#onInput = onInput;
+    this.node = document.createElement("input");
     this.render();
+
+    this.handleInput = (e) => {
+      const value = e.target.value;
+      onInput?.(value);
+    };
   }
 
-  template() {
-    const { placeholder, value = "", type = "text" } = this.state;
-    const $input = document.createElement("input");
-    $input.type = type;
-    $input.placeholder = placeholder;
-    $input.value = value;
-    return $input;
+  render() {
+    const {
+      placeholder = "",
+      value = "",
+      type = "text",
+      required = false,
+    } = this.state;
+    this.node.type = type;
+    this.node.placeholder = placeholder;
+    this.node.value = value;
+    this.node.required = required;
+    return this;
   }
 
   setEvent() {
-    this.node
-      .querySelector("input")
-      .addEventListener("input", this.#handleInput);
+    this.node.addEventListener("input", this.handleInput);
   }
 
   clearEvent() {
-    this.node
-      .querySelector("input")
-      ?.removeEventListener("input", this.#handleInput);
+    this.node?.removeEventListener("input", this.handleInput);
   }
 }
 

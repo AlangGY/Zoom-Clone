@@ -1,38 +1,30 @@
 import Component from "../Component.template.js";
 
 class Form extends Component {
-  #children;
-  #onSubmit;
-  #handleSubmit = (e) => {
-    e.preventDefault();
-    this.#onSubmit?.(e);
-  };
-
   constructor($target, { initialState, onSubmit }, ...children) {
-    super($target, initialState);
+    super($target, initialState, ...children);
     this.node = document.createElement("form");
 
-    this.#children = children;
-    this.#onSubmit = onSubmit;
+    this.handleSubmit = (e) => {
+      e.preventDefault();
+      onSubmit?.(e);
+    };
     this.render();
   }
 
-  render() {
-    let children = this.#children;
-    this.clearEvent();
-    this.node.innerHTML = "";
-    children.forEach(([ChildComponent, ...props]) =>
-      new ChildComponent(this.node, ...props).mount()
-    );
-    this.setEvent();
-  }
+  // render() {
+  //   this.children.forEach((ChildComponentInstance) => {
+  //     ChildComponentInstance.render();
+  //   });
+  //   return this;
+  // }
 
   setEvent() {
-    this.node?.addEventListener("submit", this.#handleSubmit);
+    this.node?.addEventListener("submit", this.handleSubmit);
   }
 
   clearEvent() {
-    this.node?.addEventListener("submit", this.#handleSubmit);
+    this.node?.addEventListener("submit", this.handleSubmit);
   }
 }
 
