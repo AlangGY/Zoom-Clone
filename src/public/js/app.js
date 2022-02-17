@@ -1,4 +1,5 @@
 import Header from "./components/Header.js";
+import Input from "./components/Input.js";
 
 document.componentRegistry = {};
 document.nextId = 0;
@@ -167,3 +168,9 @@ $leaveButton.addEventListener("click", handleLeaveRoom);
 const $app = document.querySelector("#app");
 
 const header = new Header($app, { title: "알랑 채팅 방" }).mount();
+
+const input = new Input($app, { placeholder: "닉네임을 입력하세요" }, (value) =>
+  console.log(value)
+).mount();
+
+input.clearEvent();
