@@ -1,4 +1,5 @@
 import Button from "./components/Button.js";
+import Form from "./components/Form.js";
 import Header from "./components/Header.js";
 import Input from "./components/Input.js";
 
@@ -168,10 +169,40 @@ $leaveButton.addEventListener("click", handleLeaveRoom);
 
 const $app = document.querySelector("#app");
 
-const header = new Header($app, { title: "알랑 채팅 방" }).mount();
+const header = new Header($app, {
+  initialState: { title: "알랑 채팅 방" },
+}).mount();
 
-const input = new Input($app, { placeholder: "닉네임을 입력하세요" }, (value) =>
-  console.log(value)
+const input = new Input(
+  $app,
+  { initialState: { placeholder: "닉네임을 입력하세요" } },
+  (value) => console.log(value)
 ).mount();
 
-const button = new Button($app, { text: "버튼", type: "button" }).mount();
+const button = new Button($app, {
+  initialState: { text: "버튼", type: "button" },
+}).mount();
+
+const form = new Form(
+  $app,
+  {
+    onSubmit(e) {
+      console.log(e);
+    },
+  },
+  [
+    Input,
+    {
+      initialState: { placeholder: "test" },
+      onInput(value) {
+        header.setState({ title: value });
+      },
+    },
+  ],
+  [
+    Button,
+    {
+      initialState: { text: "button", type: "submit" },
+    },
+  ]
+).mount();
