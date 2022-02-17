@@ -21,11 +21,10 @@ class Component {
   }
 
   render() {
-    if (this.node instanceof DocumentFragment) {
-      this.node.appendChild(this.template());
-    } else if (this.node) {
+    const template = this.template();
+    if (this.node && template) {
       this.clearEvent();
-      this.node.innerHTML = this.template();
+      this.node.innerHTML = template;
       this.setEvent();
     }
     if (this.childFragment && this.children) {
@@ -48,8 +47,8 @@ class Component {
   }
 
   mount() {
-    this.setEvent();
     this.node.appendChild(this.childFragment);
+    this.setEvent();
     this.$target.appendChild(this.node);
     return this;
   }
