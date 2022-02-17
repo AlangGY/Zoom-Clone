@@ -7,9 +7,8 @@ html(lang="en")
     title 알랑챗
     link(rel="stylesheet", href="https://unpkg.com/mvp.css")
     link(rel="stylesheet", href="/css/styles.css")
-  body 
-    header
-      h1 알랑 채팅방 
+  body
+    #app
     section 
       #nickname 
         form
@@ -35,4 +34,4 @@ html(lang="en")
           input(type="text", name="chat", placeholder="메시지를 입력하세요", required)
           button 전송
     script(src="/socket.io/socket.io.js")
-    script(src="/public/js/app.js")
+    script(src="/public/js/app.js" type="module")

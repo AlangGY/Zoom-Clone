@@ -1,3 +1,8 @@
+import Header from "./components/Header.js";
+
+document.componentRegistry = {};
+document.nextId = 0;
+
 const socket = io();
 
 const $room = document.querySelector("#room");
@@ -158,3 +163,7 @@ $chatForm.addEventListener("submit", handleChatSubmit);
 $nicknameForm.addEventListener("submit", handleNicknameSubmit);
 $roomForm.addEventListener("submit", handleRoomSubmit);
 $leaveButton.addEventListener("click", handleLeaveRoom);
+
+const $app = document.querySelector("#app");
+
+const header = new Header($app, { title: "알랑 채팅 방" }).mount();
