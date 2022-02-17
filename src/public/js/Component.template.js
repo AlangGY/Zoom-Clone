@@ -16,6 +16,8 @@ class Component {
     console.log("render!");
     this.clearEvent();
     if (this.node) this.node.innerHTML = this.template();
+    if (this.node instanceof DocumentFragment)
+      this.node.appendChild(this.template());
     this.setEvent();
     return this;
   }
