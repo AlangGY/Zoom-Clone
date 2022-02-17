@@ -1,7 +1,7 @@
 import Component from "../Component.template.js";
 
 class Header extends Component {
-  constructor($target, initialState) {
+  constructor($target, { initialState = { title: "Title" } }) {
     super($target, initialState);
     this.node = document.createElement("header");
     this.render();

@@ -11,8 +11,7 @@ class Input extends Component {
 
   constructor(
     $target,
-    initialState = { placeholder: "", value: "", type: "text" },
-    onInput
+    { initialState = { placeholder: "", value: "", type: "text" }, onInput }
   ) {
     super($target, initialState);
     this.node = document.createDocumentFragment();
