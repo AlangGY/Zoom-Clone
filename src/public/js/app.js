@@ -1,3 +1,4 @@
+import Button from "./components/Button.js";
 import Header from "./components/Header.js";
 import Input from "./components/Input.js";
 
@@ -173,4 +174,4 @@ const input = new Input($app, { placeholder: "닉네임을 입력하세요" }, (
   console.log(value)
 ).mount();
 
-input.clearEvent();
+const button = new Button($app, { text: "버튼", type: "button" }).mount();
