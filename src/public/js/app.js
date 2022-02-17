@@ -1,108 +1,63 @@
+import Component from "./Component.template.js";
 import Button from "./components/Button.js";
+import ChatRoom from "./components/ChatRoom.js";
 import Form from "./components/Form.js";
+import FormCard from "./components/FormCard/index.js";
 import Header from "./components/Header.js";
 import Input from "./components/Input.js";
+import RoomList from "./components/RoomList/index.js";
+import PrefixContent from "./PrefixContent.js";
 
 document.componentRegistry = {};
 document.nextId = 0;
 
 const socket = io();
 
-const $room = document.querySelector("#room");
-const $nickname = document.querySelector("#nickname");
 const $chat = document.querySelector("#chat");
-const $nicknameForm = $nickname.querySelector("form");
-const $roomForm = $room.querySelector("form");
 const $chatForm = $chat.querySelector("form");
-const $roomList = $room.querySelector(".roomList ul");
-const $leaveButton = $roomForm.querySelector(".leaveButton");
-
-const showLeaveButton = () => {
-  $leaveButton.classList.remove("displayNone");
-};
-
-const hideLeaveButton = () => {
-  $leaveButton.classList.add("displayNone");
-};
-
-const currentRoomProxy = new Proxy(
-  { room: null },
-  {
-    set(target, key, value) {
-      target[key] = value;
-      if (value) {
-        showLeaveButton();
-      } else {
-        hideLeaveButton();
-      }
-    },
-  }
-);
-let roomList = [];
-
-const changeNickname = (nickname) => {
-  const nicknameSpan = $nicknameForm.querySelector("h3 span");
-  nicknameSpan.textContent = nickname;
-};
-
-const showRoomTitle = (room) => {
-  const roomSpan = $roomForm.querySelector("h3 span");
-  roomSpan.textContent = room;
-};
 
 const newChat = ({ prefix, chat }) => {
-  const ul = $chatForm.querySelector("ul");
-  const li = document.createElement("li");
-  li.textContent = `${prefix || ""}${chat}`;
-  ul.appendChild(li);
+  const { chats } = globalStateProxy.state;
+  globalStateProxy.state = { chats: [...chats, `${prefix || ""}${chat}`] };
 };
 
-// socket emit
-const emitLeaveRoom = () => {
-  const room = currentRoomProxy.room;
-  if (room) {
-    socket.emit("leave_room", { room }, () => {
-      console.log(`left Room: ${room}`);
+// socket emit function
+
+const leaveRoom = () => {
+  const { room: prevRoom } = globalStateProxy.state;
+  if (prevRoom) {
+    socket.emit("leave_room", { room: prevRoom }, () => {
+      console.log(`left Room: ${prevRoom}`);
+      globalStateProxy.state = { room: null };
     });
   }
 };
 
-const emitChangeRoom = (room) => {
-  emitLeaveRoom();
-  socket.emit("enter_room", { room }, () => {
-    console.log(`entered Room: ${room}`);
-    showRoomTitle(room);
-    currentRoomProxy.room = room;
+const joinRoom = (nextRoom) => {
+  socket.emit("enter_room", { room: nextRoom }, () => {
+    console.log(`entered Room: ${nextRoom}`);
+    globalStateProxy.state = { room: nextRoom };
   });
 };
 
 // Event Handler
-const handleNicknameSubmit = (e) => {
-  e.preventDefault();
-  const input = $nicknameForm.querySelector("input");
-  const nickname = input.value;
+const handleNicknameSubmit = (nickname) => {
   socket.emit("change_nickname", { nickname }, () => {
     console.log("change nickname!");
-    changeNickname(nickname);
+    globalStateProxy.state = { nickname };
   });
-
-  input.value = "";
 };
 
-const handleRoomSubmit = (e) => {
-  e.preventDefault();
-  const input = $roomForm.querySelector("input");
-  const room = input.value;
-  emitChangeRoom(room);
-
-  input.value = "";
+const handleRoomSubmit = (nextRoom) => {
+  leaveRoom();
+  joinRoom(nextRoom);
 };
 
 const handleChatSubmit = (e) => {
   e.preventDefault();
   const input = $chatForm.querySelector("input");
   const chat = input.value;
-  socket.emit("new_chat", { chat, room: currentRoomProxy.room }, () => {
+  socket.emit("new_chat", { chat, room: globalStateProxy.state.room }, () => {
     console.log(`chat sent successfully: ${chat}`);
   });
   newChat({ prefix: "나 : ", chat });
@@ -135,74 +90,90 @@ socket.on("new_chat", ({ chat, nickname }) => {
   newChat({ prefix: `${nickname} : `, chat });
 });
 
-socket.on("room_list", ({ roomList: newRoomList }) => {
-  roomList = newRoomList;
-  console.log(newRoomList);
-  $roomList.innerHTML = `
-    ${roomList
-      .map(
-        ({ room, participants }) =>
-          `<li data-id="${room}">방 : ${room} | 참가자 수 : ${participants.length}</li>`
-      )
-      .join("")}
-  `;
+socket.on("room_list", ({ roomList }) => {
+  globalStateProxy.state = { rooms: roomList };
 });
 
-const handleChangeRoom = (e) => {
-  const room = e.target?.dataset.id;
-  if (room) {
-    emitChangeRoom(room);
-  }
-};
-
-const handleLeaveRoom = () => {
-  emitLeaveRoom();
-  currentRoomProxy.room = null;
-  showRoomTitle("입장한 방 없음");
-};
-
-$roomList.addEventListener("click", handleChangeRoom);
 $chatForm.addEventListener("submit", handleChatSubmit);
-$nicknameForm.addEventListener("submit", handleNicknameSubmit);
-$roomForm.addEventListener("submit", handleRoomSubmit);
-$leaveButton.addEventListener("click", handleLeaveRoom);
 
 const $app = document.querySelector("#app");
+
+const globalStateProxy = new Proxy(
+  { state: { nickname: null, room: null, rooms: [], chats: [] } },
+  {
+    set(proxy, state, value) {
+      if (state !== "state") return false;
+
+      proxy.state = { ...proxy.state, ...value };
+      setState(proxy.state);
+      return true;
+    },
+  }
+);
+
+const setState = (state) => {
+  const { nickname, room, rooms, chats } = state;
+  $$nicknameSpan.setState({ text: nickname });
+  $$roomSpan.setState({ text: room ?? "없음" });
+  $$roomList.setState({ rooms, currentRoom: room });
+  $$chatRoom.setState({ chats });
+};
 
 const header = new Header($app, {
   initialState: { title: "알랑 채팅 방" },
 }).mount();
 
-const input = new Input(
-  $app,
-  { initialState: { placeholder: "닉네임을 입력하세요" } },
-  (value) => console.log(value)
-).mount();
-
-const button = new Button($app, {
-  initialState: { text: "버튼", type: "button" },
+const $$nicknameSpan = new PrefixContent($app, {
+  prefix: "닉네임 : ",
+  text: globalStateProxy.state.nickname ?? "닉네임을 지어주세요",
+  block: true,
 }).mount();
 
-const form = new Form(
-  $app,
-  {
-    onSubmit(e) {
-      console.log(e);
-    },
+const $$roomSpan = new PrefixContent($app, {
+  prefix: "참가한 방 : ",
+  text: globalStateProxy.state.room ?? "없음",
+  block: true,
+}).mount();
+
+const $$nicknameForm = new FormCard($app, {
+  initialState: {
+    title: "닉네임을 입력하세요",
+    placeholder: "닉네임을 입력하세요",
+    buttonText: "설정",
+    value: "",
   },
-  [
-    Input,
-    {
-      initialState: { placeholder: "test" },
-      onInput(value) {
-        header.setState({ title: value });
-      },
-    },
-  ],
-  [
-    Button,
-    {
-      initialState: { text: "button", type: "submit" },
-    },
-  ]
-).mount();
+  onSubmit: (value) => {
+    handleNicknameSubmit(value);
+    $$nicknameForm.setState({ value: "" });
+  },
+}).mount();
+
+const $$roomForm = new FormCard($app, {
+  initialState: {
+    title: "방 제목을 입력하세요",
+    placeholder: "방 제목을 입력하세요",
+    buttonText: "설정",
+    value: "",
+  },
+  onSubmit: (value) => {
+    handleRoomSubmit(value);
+    $$roomForm.setState({ value: "" });
+  },
+}).mount();
+
+const $$roomList = new RoomList($app, {
+  initialState: {
+    rooms: globalStateProxy.state.rooms,
+    currentRoom: globalStateProxy.state.room,
+  },
+  onClickRoom(room) {
+    console.log("clicked!");
+    handleRoomSubmit(room);
+  },
+}).mount();
+
+const $$chatRoom = new ChatRoom($app, {
+  initialState: {
+    chats: globalStateProxy.state.chats,
+  },
+}).mount();
