@@ -4,10 +4,13 @@ class Component {
   state;
   node;
   children;
+  isInit;
 
   constructor({ $target, initialState = {} }) {
     this._id = ++document.nextId;
-    document.componentRegistry[this._id] = this;
+    if ($target === document.querySelector("#app")) {
+      document.componentRegistry[this._id] = this;
+    }
     this.$target = $target;
     this.state = { ...initialState };
   }
@@ -18,13 +21,12 @@ class Component {
 
   render() {
     const template = this.template();
+    // console.log(`render ${this.constructor.name}`);
     if (this.node && template) {
       this.clearEvent();
       this.node.innerHTML = template;
       this.setEvent();
     }
-    this.children?.forEach((ChildComponent) => ChildComponent.render());
-    return this;
   }
 
   setState(newState) {
@@ -33,7 +35,10 @@ class Component {
     this.children?.forEach((ChildComponent) => {
       const newChildState = Object.entries(this.state)
         .filter(([key]) => ChildComponent.state.hasOwnProperty(key))
-        .reduce((newObject, [key, value]) => (newObject[key] = value), {});
+        .reduce((newObject, [key, value]) => {
+          newObject[key] = value;
+          return newObject;
+        }, {});
       ChildComponent.setState(newChildState);
     });
     this.render();
