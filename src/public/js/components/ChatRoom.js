@@ -1,11 +1,12 @@
 import Component from "../Component.template.js";
 
+const defaultState = { chats: [] };
+
 class ChatRoom extends Component {
-  constructor($target, { initialState = { chats: [] } }) {
-    super($target, initialState);
+  constructor({ $target, initialState }) {
+    super({ $target, initialState: { ...defaultState, ...initialState } });
 
     this.node = document.createElement("div");
-    this.render();
   }
 
   template() {

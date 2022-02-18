@@ -1,16 +1,20 @@
 import Component from "../../Component.template.js";
 
+const defaultState = { rooms: [], currentRoom: null };
+
 class RoomList extends Component {
-  constructor($target, { initialState = { rooms, currentRoom }, onClickRoom }) {
-    super($target, initialState);
+  constructor({ $target, initialState, onClickRoom }) {
+    super({ $target, initialState: { ...defaultState, ...initialState } });
 
     this.node = document.createElement("div");
-    this.render();
 
+    // Event Handler
     this.handleClick = (e) => {
       const { target } = e;
-      const { id } = target.closest("li").dataset;
-      console.log(id);
+      const $li = target.closest("li");
+      if (!$li) return;
+
+      const { id } = $li.dataset;
       if (!id || id === this.state.currentRoom) return;
       if (id) {
         onClickRoom?.(id);

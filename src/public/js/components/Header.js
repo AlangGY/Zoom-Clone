@@ -1,13 +1,14 @@
 import Component from "../Component.template.js";
 
+const defaultState = { title: "title" };
+
 class Header extends Component {
-  constructor($target, { initialState }) {
-    super($target, initialState);
+  constructor({ $target, initialState }) {
+    super({ $target, initialState: { ...defaultState, ...initialState } });
     this.node = document.createElement("header");
-    this.render();
   }
   template() {
-    const { title = "title" } = this.state;
+    const { title } = this.state;
     return `
     <h1>${title}</h1>
     `;

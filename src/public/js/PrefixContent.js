@@ -1,10 +1,11 @@
 import Component from "./Component.template.js";
 
+const defaultState = { prefix: "", text: "", block: false };
+
 class PrefixContent extends Component {
-  constructor($target, initialState = { prefix: "", text: "", block: false }) {
-    super($target, initialState);
+  constructor({ $target, initialState }) {
+    super({ $target, initialState: { ...defaultState, ...initialState } });
     this.node = document.createElement(this.state.block ? "p" : "span");
-    this.render();
   }
 
   template() {

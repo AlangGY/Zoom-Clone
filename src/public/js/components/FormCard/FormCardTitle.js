@@ -1,11 +1,11 @@
 import Component from "../../Component.template.js";
 
-class FormCardTitle extends Component {
-  constructor($target, { initialState = { title: "title" } }) {
-    super($target, initialState);
-    this.node = document.createElement("h3");
+const defaultState = { title: "title" };
 
-    this.render();
+class FormCardTitle extends Component {
+  constructor({ $target, initialState }) {
+    super({ $target, initialState: { ...defaultState, ...initialState } });
+    this.node = document.createElement("h3");
   }
 
   template() {

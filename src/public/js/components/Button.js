@@ -1,10 +1,14 @@
 import Component from "../Component.template.js";
 
+const defaultState = { text: "", type: "button" };
+
 class Button extends Component {
-  constructor($target, { initialState = { text: "", type: "button" } }) {
-    super($target, initialState);
+  constructor({ $target, initialState }) {
+    super({
+      $target,
+      initialState: { ...defaultState, ...initialState },
+    });
     this.node = document.createElement("button");
-    this.render();
   }
 
   template() {

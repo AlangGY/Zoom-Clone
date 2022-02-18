@@ -1,11 +1,18 @@
 import Component from "../Component.template.js";
 
-class Input extends Component {
-  constructor($target, { initialState, onInput }) {
-    super($target, initialState);
-    this.node = document.createElement("input");
-    this.render();
+const defaultState = {
+  placeholder: "",
+  value: "",
+  type: "text",
+  required: false,
+};
 
+class Input extends Component {
+  constructor({ $target, initialState, onInput }) {
+    super({ $target, initialState: { ...defaultState, ...initialState } });
+    this.node = document.createElement("input");
+
+    // event Handler
     this.handleInput = (e) => {
       const value = e.target.value;
       onInput?.(value);
@@ -13,12 +20,7 @@ class Input extends Component {
   }
 
   render() {
-    const {
-      placeholder = "",
-      value = "",
-      type = "text",
-      required = false,
-    } = this.state;
+    const { placeholder, value, type, required } = this.state;
     this.node.type = type;
     this.node.placeholder = placeholder;
     this.node.value = value;

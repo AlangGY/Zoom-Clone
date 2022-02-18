@@ -119,27 +119,35 @@ const setState = (state) => {
   $$chatRoom.setState({ chats });
 };
 
-const header = new Header($app, {
+const header = new Header({
+  $target: $app,
   initialState: { title: "알랑 채팅 방" },
 }).mount();
 
-const $$nicknameSpan = new PrefixContent($app, {
-  prefix: "닉네임 : ",
-  text: globalStateProxy.state.nickname ?? "닉네임을 지어주세요",
-  block: true,
+const $$nicknameSpan = new PrefixContent({
+  $target: $app,
+  initialState: {
+    prefix: "닉네임 : ",
+    text: globalStateProxy.state.nickname ?? "닉네임을 지어주세요",
+    block: true,
+  },
 }).mount();
 
-const $$roomSpan = new PrefixContent($app, {
-  prefix: "참가한 방 : ",
-  text: globalStateProxy.state.room ?? "없음",
-  block: true,
+const $$roomSpan = new PrefixContent({
+  $target: $app,
+  initialState: {
+    prefix: "참가한 방 : ",
+    text: globalStateProxy.state.room ?? "없음",
+    block: true,
+  },
 }).mount();
 
-const $$nicknameForm = new FormCard($app, {
+const $$nicknameForm = new FormCard({
+  $target: $app,
   initialState: {
     title: "닉네임을 입력하세요",
     placeholder: "닉네임을 입력하세요",
-    buttonText: "설정",
+    text: "설정",
     value: "",
   },
   onSubmit: (value) => {
@@ -148,11 +156,12 @@ const $$nicknameForm = new FormCard($app, {
   },
 }).mount();
 
-const $$roomForm = new FormCard($app, {
+const $$roomForm = new FormCard({
+  $target: $app,
   initialState: {
     title: "방 제목을 입력하세요",
     placeholder: "방 제목을 입력하세요",
-    buttonText: "설정",
+    text: "설정",
     value: "",
   },
   onSubmit: (value) => {
@@ -161,7 +170,8 @@ const $$roomForm = new FormCard($app, {
   },
 }).mount();
 
-const $$roomList = new RoomList($app, {
+const $$roomList = new RoomList({
+  $target: $app,
   initialState: {
     rooms: globalStateProxy.state.rooms,
     currentRoom: globalStateProxy.state.room,
@@ -172,7 +182,8 @@ const $$roomList = new RoomList($app, {
   },
 }).mount();
 
-const $$chatRoom = new ChatRoom($app, {
+const $$chatRoom = new ChatRoom({
+  $target: $app,
   initialState: {
     chats: globalStateProxy.state.chats,
   },

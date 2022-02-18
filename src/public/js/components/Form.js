@@ -1,23 +1,15 @@
 import Component from "../Component.template.js";
 
 class Form extends Component {
-  constructor($target, { initialState, onSubmit }, ...children) {
-    super($target, initialState, ...children);
+  constructor({ $target, initialState, onSubmit }) {
+    super({ $target, initialState });
     this.node = document.createElement("form");
 
     this.handleSubmit = (e) => {
       e.preventDefault();
-      onSubmit?.(e);
+      onSubmit?.(this.state.value);
     };
-    this.render();
   }
-
-  // render() {
-  //   this.children.forEach((ChildComponentInstance) => {
-  //     ChildComponentInstance.render();
-  //   });
-  //   return this;
-  // }
 
   setEvent() {
     this.node?.addEventListener("submit", this.handleSubmit);

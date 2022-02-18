@@ -5,53 +5,37 @@ import Input from "../Input.js";
 import FormCardTitle from "./FormCardTitle.js";
 
 class FormCard extends Form {
-  constructor(
+  constructor({
     $target,
-    {
-      initialState = {
-        title: "",
-        placeholder: "placeholder",
-        buttonText: "button",
-        value: "",
+    initialState = {
+      title: "",
+      placeholder: "placeholder",
+      text: "button",
+      value: "",
+    },
+    onSubmit,
+  }) {
+    const { title, placeholder, text, value } = initialState;
+
+    super({ $target, initialState, onSubmit });
+
+    const $formCardTitle = new FormCardTitle({
+      $target: this.node,
+      initialState: { title },
+    });
+    const $input = new Input({
+      $target: this.node,
+      initialState: { placeholder, value, type: "text" },
+      onInput: (value) => {
+        this.setState({ value });
       },
-      onSubmit,
-    }
-  ) {
-    const { title, placeholder, buttonText, value } = initialState;
-    super(
-      $target,
-      { initialState, onSubmit },
-      [FormCardTitle, { initialState: { title } }],
-      [
-        Input,
-        {
-          initialState: { placeholder, value, type: "text" },
-          onInput: (value) => {
-            this.setState({ value });
-          },
-        },
-      ],
-      [
-        Button,
-        {
-          initialState: { text: buttonText },
-        },
-      ]
-    );
+    });
+    const $button = new Button({
+      $target: this.node,
+      initialState: { text },
+    });
 
-    this.handleSubmit = (e) => {
-      e.preventDefault();
-      onSubmit?.(this.state.value);
-    };
-  }
-
-  setState(nextState) {
-    this.state = { ...this.state, ...nextState };
-    const { title, placeholder, buttonText, value } = this.state;
-    const [$formCardTitle, $input, $button] = this.children;
-    $formCardTitle.setState({ title });
-    $input.setState({ value, placeholder });
-    $button.setState({ text: buttonText });
+    this.children = [$formCardTitle, $input, $button];
   }
 }
 
