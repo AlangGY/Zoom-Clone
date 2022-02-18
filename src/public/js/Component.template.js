@@ -1,19 +1,15 @@
 class Component {
+  _id;
+  _$target;
+  state;
   node;
-  childFragment;
   children;
 
-  constructor($target, initialState = {}, ...children) {
+  constructor({ $target, initialState = {} }) {
     this._id = ++document.nextId;
     document.componentRegistry[this._id] = this;
     this.$target = $target;
     this.state = { ...initialState };
-    if (children) {
-      this.childFragment = document.createDocumentFragment();
-      this.children = children.map(([ChildComponent, ...props]) =>
-        new ChildComponent(this.childFragment, ...props).mount()
-      );
-    }
   }
 
   template() {
@@ -27,35 +23,33 @@ class Component {
       this.node.innerHTML = template;
       this.setEvent();
     }
-    if (this.childFragment && this.children) {
-      this.children.forEach((ChildComponentInstance) =>
-        ChildComponentInstance.render()
-      );
-    }
+    this.children?.forEach((ChildComponent) => ChildComponent.render());
     return this;
   }
 
   setState(newState) {
     this.state = { ...this.state, ...newState };
-    if (this.childFragment && this.children) {
-      this.children.forEach((ChildComponentInstance) =>
-        ChildComponentInstance.setState(this.state)
-      );
-    }
+    // this.state 를 순회하며, 각 children이 사용하는 상태만 골라서 setState한다.
+    this.children?.forEach((ChildComponent) => {
+      const newChildState = Object.entries(this.state)
+        .filter(([key]) => ChildComponent.state.hasOwnProperty(key))
+        .reduce((newObject, [key, value]) => (newObject[key] = value), {});
+      ChildComponent.setState(newChildState);
+    });
     this.render();
     return this;
   }
 
   mount() {
-    this.node.appendChild(this.childFragment);
     this.setEvent();
+    this.children?.forEach((ChildComponent) => ChildComponent.mount());
+    this.render();
     this.$target.appendChild(this.node);
     return this;
   }
 
   unMount() {
     this.clearEvent();
-    this.node.removeChild(this.childFragment);
     this.$target.removeChild(this.node);
     return this;
   }
