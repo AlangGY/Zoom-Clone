@@ -4,20 +4,17 @@ import Form from "../Form.js";
 import Input from "../Input.js";
 import FormCardTitle from "./FormCardTitle.js";
 
-class FormCard extends Form {
-  constructor({
-    $target,
-    initialState = {
-      title: "",
-      placeholder: "placeholder",
-      text: "button",
-      value: "",
-    },
-    onSubmit,
-  }) {
-    const { title, placeholder, text, value } = initialState;
+const defaultState = { title: "", placeholder: "", text: "submit", value: "" };
 
-    super({ $target, initialState, onSubmit });
+class FormCard extends Form {
+  constructor({ $target, initialState, onSubmit }) {
+    super({
+      $target,
+      initialState: { ...defaultState, ...initialState },
+      onSubmit,
+    });
+
+    const { title, placeholder, text, value } = this.state;
 
     const $formCardTitle = new FormCardTitle({
       $target: this.node,
@@ -27,12 +24,12 @@ class FormCard extends Form {
       $target: this.node,
       initialState: { placeholder, value, type: "text" },
       onInput: (value) => {
-        this.setState({ value });
+        this.state.value = value;
       },
     });
     const $button = new Button({
       $target: this.node,
-      initialState: { text },
+      initialState: { text, type: "submit" },
     });
 
     this.children = [$formCardTitle, $input, $button];

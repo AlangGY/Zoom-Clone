@@ -12,7 +12,7 @@ class Button extends Component {
   }
 
   template() {
-    const { text, type = "submit" } = this.state;
+    const { text, type } = this.state;
     this.node.type = type;
     return text;
   }

@@ -2,7 +2,7 @@ import { validateComponent } from "./util/validator/validateComponent.js";
 
 class Component {
   _id;
-  _$target;
+  $target;
   state;
   node;
   children;
