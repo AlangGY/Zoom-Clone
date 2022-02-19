@@ -5,6 +5,6 @@ export const getPublicRooms = (rooms, socketIds) =>
   rooms
     .filter(([roomId, _]) => !socketIds.has(roomId))
     .map(([roomId, participantIdsSet]) => ({
-      room: roomId,
+      roomId,
       participants: [...participantIdsSet],
     }));

@@ -20,7 +20,9 @@ const io = SocketIO(server);
 io.on("connection", (socket) => {
   const sendRoomList = () => {
     const { rooms, sids } = socket.adapter;
+    console.log(rooms);
     const publicRooms = getPublicRooms([...rooms], sids);
+    console.log(publicRooms);
     io.emit("room_list", { roomList: publicRooms });
   };
 
