@@ -6,13 +6,14 @@ class Component {
   children;
   isInit;
 
-  constructor({ $target, initialState = {} }) {
+  constructor({ $target, initialState = {}, children }) {
     this._id = ++document.nextId;
     if ($target === document.querySelector("#app")) {
       document.componentRegistry[this._id] = this;
     }
     this.$target = $target;
     this.state = { ...initialState };
+    this.children = children;
   }
 
   template() {
