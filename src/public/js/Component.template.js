@@ -1,3 +1,5 @@
+import { validateComponent } from "./util/validator/validateComponent.js";
+
 class Component {
   _id;
   _$target;
@@ -7,6 +9,10 @@ class Component {
   isInit;
 
   constructor({ $target, initialState = {}, children }) {
+    if (!validateComponent($target, initialState)) {
+      throw new Error("Component validate Failed!");
+    }
+    // 컴포넌트 트리 생성
     this._id = ++document.nextId;
     if ($target === document.querySelector("#app")) {
       document.componentRegistry[this._id] = this;
