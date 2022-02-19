@@ -5,7 +5,6 @@ const defaultState = { rooms: [], currentRoom: null };
 class RoomList extends Component {
   constructor({ $target, initialState, onClickRoom }) {
     super({ $target, initialState: { ...defaultState, ...initialState } });
-
     this.node = document.createElement("div");
 
     // Event Handler
@@ -28,7 +27,7 @@ class RoomList extends Component {
       <h4>방 목록</h4>
       <ul>
         ${rooms
-          .map(({ roomId, participants }) => {
+          ?.map(({ roomId, participants }) => {
             const isMyRoom = roomId === currentRoom;
             const className = isMyRoom ? "currentRoom" : "";
             const inRoomText = isMyRoom ? "내가 참가중" : "";

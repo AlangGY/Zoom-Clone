@@ -15,7 +15,7 @@ class ChatRoom extends Component {
       <h4>채팅창</h4>
       <ul>
         ${chats
-          .map((chat) => {
+          ?.map((chat) => {
             return `<li>${chat}</li>`;
           })
           .join("")}
