@@ -13,9 +13,6 @@ document.nextId = 0;
 
 const socket = io();
 
-const $chat = document.querySelector("#chat");
-const $chatForm = $chat.querySelector("form");
-
 const newChat = ({ prefix, chat }) => {
   const { chats } = globalStateProxy.state;
   globalStateProxy.state = { chats: [...chats, `${prefix || ""}${chat}`] };
@@ -53,15 +50,11 @@ const handleRoomSubmit = (nextRoom) => {
   joinRoom(nextRoom);
 };
 
-const handleChatSubmit = (e) => {
-  e.preventDefault();
-  const input = $chatForm.querySelector("input");
-  const chat = input.value;
+const handleChatSubmit = (chat) => {
   socket.emit("new_chat", { chat, room: globalStateProxy.state.room }, () => {
     console.log(`chat sent successfully: ${chat}`);
   });
   newChat({ prefix: "나 : ", chat });
-  input.value = "";
 };
 
 // Events
@@ -93,8 +86,6 @@ socket.on("new_chat", ({ chat, nickname }) => {
 socket.on("room_list", ({ roomList }) => {
   globalStateProxy.state = { rooms: roomList };
 });
-
-$chatForm.addEventListener("submit", handleChatSubmit);
 
 const $app = document.querySelector("#app");
 
@@ -186,5 +177,19 @@ const $$chatRoom = new ChatRoom({
   $target: $app,
   initialState: {
     chats: globalStateProxy.state.chats,
+  },
+}).mount();
+
+const $$chatForm = new FormCard({
+  $target: $app,
+  initialState: {
+    title: "",
+    placeholder: "채팅 메시지를 입력하세요",
+    text: "전송",
+    value: "",
+  },
+  onSubmit(value) {
+    handleChatSubmit(value);
+    $$chatForm.setState({ value: "" });
   },
 }).mount();
