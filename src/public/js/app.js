@@ -3,6 +3,7 @@ import ChatRoom from "./components/ChatRoom.js";
 import FormCard from "./components/FormCard/index.js";
 import Header from "./components/Header.js";
 import RoomList from "./components/RoomList/index.js";
+import WebCam from "./components/WebCam/index.js";
 import PrefixContent from "./PrefixContent.js";
 
 // App
@@ -19,6 +20,7 @@ class App extends Component {
   #roomList;
   #chatRoom;
   #chatForm;
+  #webCam;
 
   constructor({ $target, initialState }) {
     super({ $target, initialState: { ...defaultState, ...initialState } });
@@ -109,6 +111,16 @@ class App extends Component {
         this.#chatForm.state.value = "";
       },
     });
+
+    this.#webCam = new WebCam({
+      $target,
+      initialState: {
+        width: 200,
+        height: 200,
+        on: true,
+      },
+    });
+
     this.children = [
       this.#header,
       this.#nicknameSpan,
@@ -118,6 +130,7 @@ class App extends Component {
       this.#roomList,
       this.#chatRoom,
       this.#chatForm,
+      this.#webCam,
     ];
   }
 
