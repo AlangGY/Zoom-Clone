@@ -7,6 +7,8 @@ import PrefixContent from "./PrefixContent.js";
 
 // App
 
+const defaultState = { nickname: null, room: null, rooms: [], chats: [] };
+
 class App extends Component {
   socket = io();
   #header;
@@ -19,7 +21,7 @@ class App extends Component {
   #chatForm;
 
   constructor({ $target, initialState }) {
-    super({ $target, initialState });
+    super({ $target, initialState: { ...defaultState, ...initialState } });
 
     this.#header = new Header({
       $target,
@@ -67,6 +69,10 @@ class App extends Component {
         value: "",
       },
       onSubmit: (value) => {
+        if (!this.state.nickname) {
+          alert("닉네임을 먼저 설정해주세요!");
+          return;
+        }
         this.handleRoomSubmit(value);
         this.#roomForm.state.value = "";
       },
