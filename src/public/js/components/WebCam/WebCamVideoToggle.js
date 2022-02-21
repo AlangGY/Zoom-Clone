@@ -13,7 +13,9 @@ class WebCamVideoToggle extends Button {
 
   template() {
     const { on } = this.state;
-    return on ? "카메라 끄기" : "카메라 켜기";
+    return on
+      ? "<i class='fa-solid fa-video'></i>"
+      : "<i class='fa-solid fa-video-slash'></i>";
   }
 }
 
