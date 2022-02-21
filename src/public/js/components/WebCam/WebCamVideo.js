@@ -9,7 +9,7 @@ class WebCamVideo extends Video {
       initialState: {
         autoplay: true,
         playsInline: true,
-        muted: false,
+        muted: true,
         ...defaultState,
         ...initialState,
       },
