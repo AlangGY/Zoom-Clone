@@ -105,20 +105,13 @@ class App extends Component {
       $target,
       initialState: {
         chats: this.state.chats,
-      },
-    });
-
-    this.#chatForm = new FormCard({
-      $target,
-      initialState: {
-        title: "",
-        placeholder: "채팅 메시지를 입력하세요",
-        text: "전송",
         value: "",
+        hidden: !!!this.state.room,
       },
       onSubmit: (value) => {
+        if (!value) return;
         this.handleChatSubmit(value);
-        this.#chatForm.state.value = "";
+        this.#chatRoom.state.value = "";
       },
     });
 
@@ -175,7 +168,6 @@ class App extends Component {
       this.#roomForm,
       this.#roomList,
       this.#chatRoom,
-      this.#chatForm,
       this.#webCam,
       this.#videoList,
     ];
@@ -203,7 +195,7 @@ class App extends Component {
     this.#nicknameSpan.state.text = nickname ?? "Unknown";
     this.#roomSpan.state.text = room ?? "없음";
     this.#roomList.state.state = { rooms, currentRoom: room };
-    this.#chatRoom.state.chats = chats;
+    this.#chatRoom.state.state = { chats, hidden: !!!room };
     this.#videoList.state.videos = videos;
     this.render();
     return this;
