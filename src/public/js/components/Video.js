@@ -6,8 +6,8 @@ const defaultState = {
   muted: false,
   width: 100,
   height: 100,
-  src: "",
-  srcObject: {},
+  src: null,
+  srcObject: null,
 };
 
 class Video extends Component {
