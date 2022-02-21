@@ -3,15 +3,25 @@ import ChatRoom from "./components/ChatRoom.js";
 import FormCard from "./components/FormCard/index.js";
 import Header from "./components/Header.js";
 import RoomList from "./components/RoomList/index.js";
+import Video from "./components/Video.js";
+import VideoList from "./components/VideoList.js";
 import WebCam from "./components/WebCam/index.js";
 import PrefixContent from "./PrefixContent.js";
+import webRTC from "./webRTC.js";
 
 // App
 
-const defaultState = { nickname: null, room: null, rooms: [], chats: [] };
+const defaultState = {
+  nickname: null,
+  room: null,
+  rooms: [],
+  chats: [],
+  videos: [],
+};
 
 class App extends Component {
   socket = io();
+  peerConnection = webRTC.makeRTCPeerConnection();
   #header;
   #nicknameSpan;
   #roomSpan;
@@ -21,10 +31,10 @@ class App extends Component {
   #chatRoom;
   #chatForm;
   #webCam;
+  #videoList;
 
   constructor({ $target, initialState }) {
     super({ $target, initialState: { ...defaultState, ...initialState } });
-
     this.#header = new Header({
       $target,
       initialState: { title: "알랑 채팅 방" },
@@ -118,6 +128,42 @@ class App extends Component {
         width: 200,
         height: 200,
         on: true,
+        muted: false,
+      },
+      onChangeStream: async ({ stream, tracks }) => {
+        console.log("change Stream!");
+        const videoTrack = tracks?.find((track) => track.kind === "video");
+        const audioTrack = tracks?.find((track) => track.kind === "audio");
+        const senders = this.peerConnection.getSenders();
+        const videoSender = senders.find(
+          (sender) => sender.track?.kind === "video"
+        );
+        const audioSender = senders.find(
+          (sender) => sender.track?.kind === "audio"
+        );
+        if (videoSender) {
+          await videoSender.replaceTrack(videoTrack);
+        } else if (videoTrack instanceof MediaStreamTrack) {
+          const emptySender = senders.find((sender) => !sender.track);
+          emptySender
+            ? await emptySender.replaceTrack(videoTrack)
+            : this.peerConnection.addTrack(videoTrack, stream);
+        }
+        if (audioSender) {
+          await audioSender.replaceTrack(audioTrack);
+        } else if (audioTrack instanceof MediaStreamTrack) {
+          const emptySender = senders.find((sender) => !sender.track);
+          emptySender
+            ? await emptySender.replaceTrack(audioTrack)
+            : this.peerConnection.addTrack(audioTrack, stream);
+        }
+      },
+    });
+
+    this.#videoList = new VideoList({
+      $target,
+      initialState: {
+        videos: [],
       },
     });
 
@@ -131,24 +177,50 @@ class App extends Component {
       this.#chatRoom,
       this.#chatForm,
       this.#webCam,
+      this.#videoList,
     ];
+
+    this.handleIce = (ice) => {
+      console.log("send ice candidate");
+      const { candidate } = ice;
+      this.socket.emit("ice", { candidate, room: this.state.room });
+    };
+
+    this.handleTrack = (data) => {
+      console.log("got track from peer");
+      const stream = data.streams[0];
+      const hasStream = this.state.videos.find(
+        ({ srcObject }) => srcObject.id === stream.id
+      );
+      if (hasStream) return;
+      const video = { srcObject: stream, width: 200, height: 200 };
+      this.state.videos = [...this.state.videos, video];
+    };
   }
 
   setChildrenState(state) {
-    const { nickname, room, rooms, chats } = state;
+    const { nickname, room, rooms, chats, videos } = state;
     this.#nicknameSpan.state.text = nickname ?? "Unknown";
     this.#roomSpan.state.text = room ?? "없음";
     this.#roomList.state.state = { rooms, currentRoom: room };
     this.#chatRoom.state.chats = chats;
+    this.#videoList.state.videos = videos;
     this.render();
     return this;
   }
 
   setEvent() {
-    this.socket.on("announce", ({ type, nickname, prevNickname }) => {
+    this.peerConnection.addEventListener("icecandidate", this.handleIce);
+    this.peerConnection.addEventListener("track", this.handleTrack);
+
+    // Socket Events
+    this.socket.on("announce", async ({ type, nickname, prevNickname }) => {
       switch (type) {
         case "join":
           this.appendChat({ chat: `'${nickname}'님이 입장하셨습니다.` });
+          const offer = await this.peerConnection.createOffer();
+          this.peerConnection.setLocalDescription(offer);
+          this.socket.emit("offer", { offer, room: this.state.room });
           break;
         case "leave":
           this.appendChat({ chat: `'${nickname}'님이 퇴장하셨습니다.` });
@@ -172,6 +244,34 @@ class App extends Component {
     this.socket.on("room_list", ({ roomList }) => {
       this.state.rooms = roomList;
     });
+
+    this.socket.on("offer", async ({ offer }) => {
+      this.peerConnection.setRemoteDescription(offer);
+      const answer = await this.peerConnection.createAnswer();
+      this.peerConnection.setLocalDescription(answer);
+      this.socket.emit("answer", { answer, room: this.state.room });
+    });
+
+    this.socket.on("answer", ({ answer }) => {
+      console.log("got answer");
+      this.peerConnection.setRemoteDescription(answer);
+    });
+
+    this.socket.on("ice", async ({ candidate }) => {
+      console.log("got ice");
+      try {
+        await this.peerConnection.addIceCandidate(candidate);
+      } catch (e) {
+        console.log("adding Ice Candidate Failed!");
+        console.error(e);
+      }
+    });
+  }
+
+  clearEvent() {
+    this.peerConnection.removeEventListener("icecandidate", this.handleIce);
+
+    this.peerConnection.removeEventListener("track", this.handleTrack);
   }
 
   appendChat({ prefix, chat }) {
@@ -199,6 +299,8 @@ class App extends Component {
       console.log(`entered Room: ${nextRoom}`);
       this.state.room = nextRoom;
     });
+
+    // this.peerConnections = [makeRTCPeerConnection([])];
   }
 
   handleChatSubmit(chat) {

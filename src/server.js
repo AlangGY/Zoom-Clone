@@ -74,6 +74,18 @@ io.on("connection", (socket) => {
     socket.to(room).emit("new_chat", { nickname: socket["__nickname"], chat });
     done?.();
   });
+
+  socket.on("offer", ({ offer, room }) => {
+    socket.to(room).emit("offer", { offer });
+  });
+
+  socket.on("answer", ({ answer, room }) => {
+    socket.to(room).emit("answer", { answer });
+  });
+
+  socket.on("ice", ({ candidate, room }) => {
+    socket.to(room).emit("ice", { candidate });
+  });
 });
 
 server.listen(3000, handleListen);
