@@ -3,6 +3,7 @@ import VideoToggle from "./WebCamVideoToggle.js";
 import AudioToggle from "./WebCamAudioToggle.js";
 import Video from "./WebCamVideo.js";
 import Select from "./WebCamSelect.js";
+import isMobile from "../../util/validator/isMobile.js";
 
 const WebCamComps = { Video, VideoToggle, AudioToggle, Select };
 
@@ -23,8 +24,9 @@ class WebCam extends Component {
   #select;
   #getMedia;
   #getCamera;
+  #isMobile = isMobile();
 
-  constructor({ $target, initialState }) {
+  constructor({ $target, initialState, onChangeStream }) {
     super({
       $target,
       initialState: {
@@ -53,11 +55,7 @@ class WebCam extends Component {
       },
       onClick: () => {
         $component.state.on = !$component.state.on;
-        if ($component.state.on) {
-          $component.#getCamera();
-        } else {
-          $component.state.srcObject = null;
-        }
+        $component.#getCamera();
       },
     });
 
@@ -68,6 +66,7 @@ class WebCam extends Component {
       },
       onClick: () => {
         $component.state.muted = !$component.state.muted;
+        $component.#getCamera();
       },
     });
 
@@ -89,13 +88,24 @@ class WebCam extends Component {
 
     this.#getMedia = async () => {
       try {
+        // Mobile Device
+        if (this.#isMobile) {
+          const options = [
+            { value: "user", text: "전면" },
+            { value: "environment", text: "후면" },
+          ];
+          this.state.options = options;
+          this.state.state = { options, selectedVideoId: options[0].value };
+          return;
+        }
+        // DeskTop Device
         const options = await navigator.mediaDevices
           .enumerateDevices()
-          .then((tracks) =>
-            tracks
+          .then((tracks) => {
+            return tracks
               .filter(({ kind }) => kind === "videoinput")
-              .map(({ deviceId, label }) => ({ value: deviceId, text: label }))
-          );
+              .map(({ deviceId, label }) => ({ value: deviceId, text: label }));
+          });
 
         this.state.options = options;
         if (options.length) {
@@ -108,16 +118,27 @@ class WebCam extends Component {
 
     this.#getCamera = async () => {
       try {
-        const selectedVideoId = this.state.selectedVideoId;
+        const { selectedVideoId, muted, on } = this.state;
+        if (muted && !on) {
+          const emptyStream = new MediaStream();
+          this.state.srcObject = emptyStream;
+          const tracks = emptyStream.getTracks();
+          onChangeStream?.({ stream: emptyStream, tracks });
+          return;
+        }
         const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-          video: selectedVideoId
-            ? { deviceId: this.state.selectedVideoId }
-            : true,
+          audio: !muted,
+          video: on
+            ? this.#isMobile
+              ? { facingMode: selectedVideoId }
+              : { deviceId: selectedVideoId }
+            : false,
         });
         this.state.srcObject = stream;
+        const tracks = stream.getTracks();
+        onChangeStream?.({ stream, tracks });
       } catch (e) {
-        alert(e);
+        console.error(e);
       }
     };
   }
@@ -125,7 +146,7 @@ class WebCam extends Component {
   setChildrenState(newState) {
     const { on, muted, srcObject, options, selectedVideoId, width, height } =
       newState;
-    this.#video.state.state = { width, height, srcObject, muted };
+    this.#video.state.state = { width, height, srcObject };
     this.#videoToggle.state.on = on;
     this.#audioToggle.state.on = !muted;
     this.#select.state.state = {
