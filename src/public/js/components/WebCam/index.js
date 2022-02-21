@@ -4,6 +4,7 @@ import AudioToggle from "./WebCamAudioToggle.js";
 import Video from "./WebCamVideo.js";
 import Select from "./WebCamSelect.js";
 import isMobile from "../../util/validator/isMobile.js";
+import Container from "../Container.js";
 
 const WebCamComps = { Video, VideoToggle, AudioToggle, Select };
 
@@ -19,6 +20,7 @@ const defaultState = {
 
 class WebCam extends Component {
   #video;
+  #controlContainer;
   #videoToggle;
   #audioToggle;
   #select;
@@ -35,7 +37,7 @@ class WebCam extends Component {
       },
     });
     this.node = document.createElement("div");
-    this.node.className = "webcam";
+    this.node.classList.add("webcam");
 
     const $component = this;
 
@@ -48,8 +50,13 @@ class WebCam extends Component {
       },
     });
 
-    this.#videoToggle = new WebCamComps.VideoToggle({
+    this.#controlContainer = new Container({
       $target: this.node,
+      className: "controlContainer",
+    });
+
+    this.#videoToggle = new WebCamComps.VideoToggle({
+      $target: this.#controlContainer.node,
       initialState: {
         on: this.state.on,
       },
@@ -60,7 +67,7 @@ class WebCam extends Component {
     });
 
     this.#audioToggle = new WebCamComps.AudioToggle({
-      $target: this.node,
+      $target: this.#controlContainer.node,
       initialState: {
         on: !this.state.muted,
       },
@@ -71,7 +78,7 @@ class WebCam extends Component {
     });
 
     this.#select = new WebCamComps.Select({
-      $target: this.node,
+      $target: this.#controlContainer.node,
       initialState: {},
       onChange: (value) => {
         $component.state.selectedVideoId = value;
@@ -81,9 +88,10 @@ class WebCam extends Component {
 
     this.children = [
       this.#video,
+      this.#controlContainer,
       this.#videoToggle,
-      this.#select,
       this.#audioToggle,
+      this.#select,
     ];
 
     this.#getMedia = async () => {
