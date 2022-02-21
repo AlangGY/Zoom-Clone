@@ -54,6 +54,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     const rooms = getEnteredRoom([...socket.rooms], socket.id);
+    if (!rooms.length) return;
     socket
       .to(rooms)
       .emit("announce", { type: "leave", nickname: socket["__nickname"] });
