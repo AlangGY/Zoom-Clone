@@ -1,12 +1,28 @@
 import Component from "../Component.template.js";
+import FormCard from "./FormCard/index.js";
 
 const defaultState = { chats: [] };
 
 class ChatRoom extends Component {
-  constructor({ $target, initialState }) {
+  #form;
+  constructor({ $target, initialState, onSubmit }) {
     super({ $target, initialState: { ...defaultState, ...initialState } });
-
     this.node = document.createElement("div");
+    this.node.classList.add("chatRoom");
+
+    this.#form = new FormCard({
+      $target: this.node,
+      initialState: {
+        title: "",
+        placeholder: "채팅 메시지를 입력하세요",
+        text: "전송",
+        value: this.state.value,
+      },
+      onSubmit,
+      className: "chat",
+    });
+
+    this.children = [this.#form];
   }
 
   template() {

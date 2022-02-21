@@ -1,0 +1,51 @@
+.roomList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 300px;
+  height: 200px;
+  box-shadow: 0 1px 2px -1px black;
+  background-color: rgb(250, 250, 250);
+  padding: 5px;
+}
+
+.roomList h4 {
+  height: 20px;
+  flex-shrink: 0;
+  vertical-align: middle;
+  margin-top: 5px;
+  margin-bottom: 10px;
+}
+
+.roomList ul {
+  width: 100%;
+  height: 100%;
+  border: 1px solid rgb(200, 200, 200);
+  padding: 5px 10px;
+  overflow-y: scroll;
+  display: flex;
+  flex-direction: column;
+}
+
+.roomList ul li {
+  margin-bottom: 2px;
+  padding: 4px;
+  border-radius: 5px;
+}
+.roomList ul li:not(.selected) {
+  cursor: pointer;
+}
+
+.roomList ul li:hover {
+  background-color: rgb(240, 223, 255);
+}
+
+.roomList ul li:active {
+  background-color: rgb(234, 192, 255);
+}
+
+.roomList ul li.selected {
+  background-color: rgb(240, 223, 255);
+  cursor: default;
+}

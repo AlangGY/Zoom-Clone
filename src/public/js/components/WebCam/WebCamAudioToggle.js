@@ -13,7 +13,9 @@ class WebCamAudioToggle extends Button {
 
   template() {
     const { on } = this.state;
-    return on ? "오디오 끄기" : "오디오 켜기";
+    return on
+      ? "<i class='fa-solid fa-microphone-lines'></i>"
+      : "<i class='fa-solid fa-microphone-lines-slash'></i>";
   }
 }
 

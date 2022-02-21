@@ -5,7 +5,9 @@ const defaultState = { title: "title" };
 class Header extends Component {
   constructor({ $target, initialState }) {
     super({ $target, initialState: { ...defaultState, ...initialState } });
+
     this.node = document.createElement("header");
+    this.node.classList.add("header");
   }
   template() {
     const { title } = this.state;

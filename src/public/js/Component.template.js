@@ -62,6 +62,9 @@ class Component {
   render() {
     const template = this.template();
     const hasChild = !!this.children;
+    const hidden = this.state.hidden;
+    if (this.node instanceof Node)
+      this.node.style = `${hidden ? "display: none;" : ""}`;
     // 만약 template이 존재하지 않으면, render 할 필요가 없다. (child의 경우는 proxy의 setter로 인해 각자의 render 메서드가 호출된다.)
     if (!template) return;
 

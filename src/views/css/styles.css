@@ -1,20 +1,21 @@
-.roomList li {
-  cursor: pointer;
-  display: inline-block;
+@import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
+@import "./components/Input.css";
+@import "./components/Button.css";
+@import "./components/FormCard.css";
+@import "./components/ChatRoom.css";
+@import "./components/RoomList.css";
+@import "./components/Header.css";
+@import "./components/WebCam.css";
+@import "./components/VideoList.css";
+
+* {
+  box-sizing: border-box;
 }
 
-.roomList li:hover {
-  opacity: 0.8;
+p {
+  font-size: 1.1em;
 }
 
-.displayNone {
-  display: none;
-}
-
-button.normalButton {
-  background-color: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  margin-left: 5px;
+body {
+  padding: 16px;
 }
