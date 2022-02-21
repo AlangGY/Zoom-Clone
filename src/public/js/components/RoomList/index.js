@@ -5,7 +5,9 @@ const defaultState = { rooms: [], currentRoom: null };
 class RoomList extends Component {
   constructor({ $target, initialState, onClickRoom }) {
     super({ $target, initialState: { ...defaultState, ...initialState } });
+
     this.node = document.createElement("div");
+    this.node.classList.add("roomList");
 
     // Event Handler
     this.handleClick = (e) => {
@@ -29,11 +31,11 @@ class RoomList extends Component {
         ${rooms
           ?.map(({ roomId, participants }) => {
             const isMyRoom = roomId === currentRoom;
-            const className = isMyRoom ? "currentRoom" : "";
-            const inRoomText = isMyRoom ? "내가 참가중" : "";
+            const className = isMyRoom ? "selected" : "";
+            const inRoomText = isMyRoom ? "참가중" : "";
             return `
             <li ${className && `class="${className}"`} data-id="${roomId}">
-              ${roomId} [${participants.length}명] ${inRoomText}
+              - ${roomId} [${participants.length}명] ${inRoomText}
             </li>`;
           })
           .join("")}

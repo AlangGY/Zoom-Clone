@@ -8,9 +8,11 @@ const defaultState = {
 };
 
 class Input extends Component {
-  constructor({ $target, initialState, onInput }) {
+  constructor({ $target, initialState, onInput, className }) {
     super({ $target, initialState: { ...defaultState, ...initialState } });
     this.node = document.createElement("input");
+    this.node.classList.add("input");
+    className && this.node.classList.add(className);
 
     // event Handler
     this.handleInput = (e) => {

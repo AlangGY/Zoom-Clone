@@ -3,12 +3,14 @@ import Component from "../Component.template.js";
 const defaultState = { text: "", type: "button" };
 
 class Button extends Component {
-  constructor({ $target, initialState, onClick }) {
+  constructor({ $target, initialState, onClick, className }) {
     super({
       $target,
       initialState: { ...defaultState, ...initialState },
     });
     this.node = document.createElement("button");
+    this.node.classList.add("button");
+    className && this.node.classList.add(className);
 
     this.handleClick = (e) => {
       onClick?.(e);
