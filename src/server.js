@@ -20,9 +20,7 @@ const io = SocketIO(server);
 io.on("connection", (socket) => {
   const sendRoomList = () => {
     const { rooms, sids } = socket.adapter;
-    console.log(rooms);
     const publicRooms = getPublicRooms([...rooms], sids);
-    console.log(publicRooms);
     io.emit("room_list", { roomList: publicRooms });
   };
 
@@ -50,13 +48,17 @@ io.on("connection", (socket) => {
     done?.();
   });
 
-  socket.on("disconnecting", () => {});
-
-  socket.on("disconnect", () => {
+  socket.on("disconnecting", () => {
+    console.log("disconnecting");
     const rooms = getEnteredRoom([...socket.rooms], socket.id);
+    if (!rooms.length) return;
     socket
       .to(rooms)
       .emit("announce", { type: "leave", nickname: socket["__nickname"] });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("disconnected! SendRoomList");
     sendRoomList();
   });
 
