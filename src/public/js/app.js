@@ -6,7 +6,7 @@ import RoomList from "./components/RoomList/index.js";
 import Video from "./components/Video.js";
 import VideoList from "./components/VideoList.js";
 import WebCam from "./components/WebCam/index.js";
-import PrefixContent from "./PrefixContent.js";
+import PrefixContent from "./components/PrefixContent.js";
 import webRTC from "./webRTC.js";
 
 // App
@@ -61,12 +61,13 @@ class App extends Component {
     this.#nicknameForm = new FormCard({
       $target,
       initialState: {
-        title: "닉네임을 입력하세요",
+        title: "닉네임 설정",
         placeholder: "닉네임을 입력하세요",
         text: "설정",
         value: "",
       },
       onSubmit: (value) => {
+        if (!value) return;
         this.handleNicknameSubmit(value);
         this.#nicknameForm.state.value = "";
       },
@@ -75,12 +76,13 @@ class App extends Component {
     this.#roomForm = new FormCard({
       $target,
       initialState: {
-        title: "방 제목을 입력하세요",
+        title: "방 참가",
         placeholder: "방 제목을 입력하세요",
-        text: "설정",
+        text: "참가 / 생성",
         value: "",
       },
       onSubmit: (value) => {
+        if (!value) return;
         if (!this.state.nickname) {
           alert("닉네임을 먼저 설정해주세요!");
           return;
