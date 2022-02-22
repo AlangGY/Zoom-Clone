@@ -7,6 +7,8 @@
 @import "./components/Header.css";
 @import "./components/WebCam.css";
 @import "./components/VideoList.css";
+@import "./compounds/Settings.css";
+@import "./compounds/SideBar.css";
 
 * {
   box-sizing: border-box;
@@ -17,5 +19,19 @@ p {
 }
 
 body {
-  padding: 16px;
+  width: 100%;
+  height: 100vh;
+  overflow-y: hidden;
+}
+
+#app {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  grid-template-columns: 230px 1fr 2fr;
+  grid-template-rows: 80px 1fr;
+  grid-template-areas:
+    "header header header"
+    "sidebar camAndChat room";
+  gap: 5px;
 }
