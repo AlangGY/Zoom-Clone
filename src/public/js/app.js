@@ -25,13 +25,12 @@ class App extends Component {
   audioTrack;
   videoTrack;
   #header;
-  #nicknameSpan;
-  #roomSpan;
-  #nicknameForm;
-  #roomForm;
+  #sideBar;
+  #settings;
   #roomList;
-  #chatRoom;
+  #camAndChat;
   #webCam;
+  #chatRoom;
   #videoList;
 
   constructor({ $target, initialState }) {
@@ -41,6 +40,7 @@ class App extends Component {
       initialState: { title: "알랑 채팅 방" },
     });
 
+    this.#sideBar = new Container({ $target, className: "sidebar" });
     this.#settings = new Settings({
       $target: this.#sideBar.node,
       initialState: {
@@ -61,7 +61,7 @@ class App extends Component {
     });
 
     this.#roomList = new RoomList({
-      $target,
+      $target: this.#sideBar.node,
       initialState: {
         rooms: this.state.rooms,
         currentRoom: this.state.room,
@@ -71,20 +71,10 @@ class App extends Component {
       },
     });
 
-    this.#chatRoom = new ChatRoom({
-      $target,
-      initialState: {
-        chats: this.state.chats,
-        hidden: !!!this.state.room,
-      },
-      onSubmit: (value) => {
-        if (!value) return;
-        this.handleChatSubmit(value);
-      },
-    });
+    this.#camAndChat = new Container({ $target, className: "camAndChat" });
 
     this.#webCam = new WebCam({
-      $target,
+      $target: this.#camAndChat.node,
       initialState: {
         width: 200,
         height: 200,
@@ -161,6 +151,18 @@ class App extends Component {
       },
     });
 
+    this.#chatRoom = new ChatRoom({
+      $target: this.#camAndChat.node,
+      initialState: {
+        chats: this.state.chats,
+        hidden: !!!this.state.room,
+      },
+      onSubmit: (value) => {
+        if (!value) return;
+        this.handleChatSubmit(value);
+      },
+    });
+
     this.#videoList = new VideoList({
       $target,
       initialState: {
@@ -170,10 +172,12 @@ class App extends Component {
 
     this.children = [
       this.#header,
+      this.#sideBar,
       this.#settings,
       this.#roomList,
-      this.#chatRoom,
+      this.#camAndChat,
       this.#webCam,
+      this.#chatRoom,
       this.#videoList,
     ];
 
