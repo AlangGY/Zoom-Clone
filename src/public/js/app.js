@@ -3,7 +3,7 @@ import ChatRoom from "./components/ChatRoom.js";
 import FormCard from "./components/FormCard/index.js";
 import Header from "./components/Header.js";
 import RoomList from "./components/RoomList/index.js";
-import Video from "./components/Video.js";
+// import Video from "./components/Video.js";
 import VideoList from "./components/VideoList.js";
 import WebCam from "./components/WebCam/index.js";
 import PrefixContent from "./components/PrefixContent.js";
@@ -31,7 +31,6 @@ class App extends Component {
   #roomForm;
   #roomList;
   #chatRoom;
-  #chatForm;
   #webCam;
   #videoList;
 
