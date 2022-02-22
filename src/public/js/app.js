@@ -127,33 +127,73 @@ class App extends Component {
         on: true,
         muted: false,
       },
-      onChangeStream: async ({ stream, tracks }) => {
+      onVideoToggled: (on) => {
+        if (this.videoTrack) {
+          this.videoTrack.enabled = on;
+        }
+        Object.values(this.peerConnections).forEach(async (peerConnection) => {
+          const videoSender = peerConnection
+            .getSenders()
+            .find((sender) => sender.track?.kind === "video");
+          if (videoSender?.track) {
+            videoSender.track.enabled = on;
+          }
+        });
+      },
+      onAudioToggled: (muted) => {
+        if (this.audioTrack) {
+          this.audioTrack.enabled = !muted;
+        }
+        Object.values(this.peerConnections).forEach(async (peerConnection) => {
+          const audioSender = peerConnection
+            .getSenders()
+            .find((sender) => sender.track?.kind === "audio");
+          if (audioSender?.track) {
+            audioSender.track.enabled = !muted;
+          }
+        });
+      },
+      onChangeStream: ({ stream, muted, on }) => {
         console.log("change Stream!");
+
+        const tracks = stream.getTracks();
+
         const videoTrack = tracks?.find((track) => track.kind === "video");
+        videoTrack.enabled = on;
         const audioTrack = tracks?.find((track) => track.kind === "audio");
-        const senders = this.peerConnection.getSenders();
-        const videoSender = senders.find(
-          (sender) => sender.track?.kind === "video"
-        );
-        const audioSender = senders.find(
-          (sender) => sender.track?.kind === "audio"
-        );
-        if (videoSender) {
-          await videoSender.replaceTrack(videoTrack);
-        } else if (videoTrack instanceof MediaStreamTrack) {
-          const emptySender = senders.find((sender) => !sender.track);
-          emptySender
-            ? await emptySender.replaceTrack(videoTrack)
-            : this.peerConnection.addTrack(videoTrack, stream);
-        }
-        if (audioSender) {
-          await audioSender.replaceTrack(audioTrack);
-        } else if (audioTrack instanceof MediaStreamTrack) {
-          const emptySender = senders.find((sender) => !sender.track);
-          emptySender
-            ? await emptySender.replaceTrack(audioTrack)
-            : this.peerConnection.addTrack(audioTrack, stream);
-        }
+        audioTrack.enabled = !muted;
+
+        this.videoTrack = videoTrack;
+        this.audioTrack = audioTrack;
+
+        Object.values(this.peerConnections).forEach(async (peerConnection) => {
+          const senders = peerConnection.getSenders();
+          console.log(senders);
+          const videoSender = senders.find(
+            (sender) => sender.track?.kind === "video"
+          );
+          const audioSender = senders.find(
+            (sender) => sender.track?.kind === "audio"
+          );
+          if (videoSender) {
+            await videoSender.replaceTrack(videoTrack);
+          } else if (videoTrack instanceof MediaStreamTrack) {
+            const emptySender = senders.find((sender) => !sender.track);
+            emptySender
+              ? await emptySender.replaceTrack(videoTrack)
+              : peerConnection.addTrack(videoTrack, stream);
+          }
+          if (audioSender) {
+            await audioSender.replaceTrack(audioTrack);
+          } else if (audioTrack instanceof MediaStreamTrack) {
+            const emptySender = senders.find((sender) => !sender.track);
+            emptySender
+              ? await emptySender.replaceTrack(audioTrack)
+              : peerConnection.addTrack(audioTrack, stream);
+          }
+
+          console.log(peerConnection.getSenders());
+        });
       },
     });
 
