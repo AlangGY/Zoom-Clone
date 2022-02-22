@@ -56,6 +56,7 @@ class FormCard extends Form {
     this.handleSubmit = (e) => {
       e.preventDefault();
       onSubmit?.(this.state.value);
+      this.state.value = "";
       requestAnimationFrame(() => {
         this.#input.node?.focus();
       });

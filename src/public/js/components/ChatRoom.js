@@ -16,7 +16,6 @@ class ChatRoom extends Component {
         title: "",
         placeholder: "채팅 메시지를 입력하세요",
         text: "전송",
-        value: this.state.value,
       },
       onSubmit,
       className: "chat",
