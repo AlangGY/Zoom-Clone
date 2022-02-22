@@ -89,7 +89,6 @@ class App extends Component {
           return;
         }
         this.handleRoomSubmit(value);
-        this.#roomForm.state.value = "";
       },
     });
 
@@ -108,13 +107,11 @@ class App extends Component {
       $target,
       initialState: {
         chats: this.state.chats,
-        value: "",
         hidden: !!!this.state.room,
       },
       onSubmit: (value) => {
         if (!value) return;
         this.handleChatSubmit(value);
-        this.#chatRoom.state.value = "";
       },
     });
 
