@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "Zoom Clone using WebSocket",
   "scripts": {
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "build": "babel-node src/server.js"
   },
   "keywords": [],
   "author": "",
