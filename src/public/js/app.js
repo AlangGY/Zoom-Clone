@@ -21,7 +21,9 @@ const defaultState = {
 
 class App extends Component {
   socket = io();
-  peerConnection = webRTC.makeRTCPeerConnection();
+  peerConnections = {};
+  audioTrack;
+  videoTrack;
   #header;
   #nicknameSpan;
   #roomSpan;
@@ -175,20 +177,34 @@ class App extends Component {
     ];
 
     this.handleIce = (ice) => {
-      console.log("send ice candidate");
-      const { candidate } = ice;
-      this.socket.emit("ice", { candidate, room: this.state.room });
+      console.log(`send ice candidate to ${ice.target._id}`);
+      const {
+        candidate,
+        target: { _id: id },
+      } = ice;
+      this.socket.emit("ice", { candidate, id });
     };
 
-    this.handleTrack = (data) => {
-      console.log("got track from peer");
-      const stream = data.streams[0];
-      const hasStream = this.state.videos.find(
-        ({ srcObject }) => srcObject.id === stream.id
-      );
-      if (hasStream) return;
-      const video = { srcObject: stream, width: 200, height: 200 };
-      this.state.videos = [...this.state.videos, video];
+    this.handleTrack = (event) => {
+      console.log(`got track from ${event.target._id}`);
+      const videoStream = this.state.videos.find(
+        ({ id }) => id === event.target["_id"]
+      )?.srcObject;
+      if (!videoStream) {
+        const stream = new MediaStream();
+        stream.addTrack(event.track);
+        const video = {
+          srcObject: stream,
+          width: 200,
+          height: 200,
+          id: event.target["_id"],
+        };
+        this.state.videos = [...this.state.videos, video];
+        console.log(this.state.videos);
+        return;
+      }
+      videoStream.addTrack(event.track);
+      console.log(this.state.videos);
     };
   }
 
@@ -204,20 +220,32 @@ class App extends Component {
   }
 
   setEvent() {
-    this.peerConnection.addEventListener("icecandidate", this.handleIce);
-    this.peerConnection.addEventListener("track", this.handleTrack);
-
     // Socket Events
-    this.socket.on("announce", async ({ type, nickname, prevNickname }) => {
+    this.socket.on("announce", async ({ type, nickname, prevNickname, id }) => {
       switch (type) {
         case "join":
           this.appendChat({ chat: `'${nickname}'님이 입장하셨습니다.` });
-          const offer = await this.peerConnection.createOffer();
-          this.peerConnection.setLocalDescription(offer);
-          this.socket.emit("offer", { offer, room: this.state.room });
+          const peerConnection = webRTC.makeRTCPeerConnection({
+            id,
+            videoTrack: this.videoTrack,
+            audioTrack: this.audioTrack,
+            onIceCandidate: this.handleIce,
+            onTrack: this.handleTrack,
+          });
+          this.peerConnections[id] = peerConnection;
+
+          const offer = await peerConnection.createOffer();
+          peerConnection.setLocalDescription(offer);
+          console.log(`send offer to ${id}`);
+          this.socket.emit("offer", { offer, id });
           break;
         case "leave":
           this.appendChat({ chat: `'${nickname}'님이 퇴장하셨습니다.` });
+          this.peerConnections[id]?.close();
+          delete this.peerConnections[id];
+          this.state.videos = this.state.videos.filter(
+            ({ id: videoId }) => videoId !== id
+          );
           break;
         case "change-nickname":
           this.appendChat({
@@ -239,33 +267,42 @@ class App extends Component {
       this.state.rooms = roomList;
     });
 
-    this.socket.on("offer", async ({ offer }) => {
-      this.peerConnection.setRemoteDescription(offer);
-      const answer = await this.peerConnection.createAnswer();
-      this.peerConnection.setLocalDescription(answer);
-      this.socket.emit("answer", { answer, room: this.state.room });
+    this.socket.on("offer", async ({ offer, id }) => {
+      console.log(`got offer from ${id}`);
+      const peerConnection = webRTC.makeRTCPeerConnection({
+        id,
+        videoTrack: this.videoTrack,
+        audioTrack: this.audioTrack,
+        onIceCandidate: this.handleIce,
+        onTrack: this.handleTrack,
+      });
+      peerConnection.setRemoteDescription(offer);
+      this.peerConnections[id] = peerConnection;
+      const answer = await peerConnection.createAnswer();
+      peerConnection.setLocalDescription(answer);
+      this.socket.emit("answer", { answer, id });
+      console.log(this.peerConnections[id]);
     });
 
-    this.socket.on("answer", ({ answer }) => {
-      console.log("got answer");
-      this.peerConnection.setRemoteDescription(answer);
+    this.socket.on("answer", ({ answer, id }) => {
+      console.log(`got answer from ${id}`);
+      if (!this.peerConnections[id]) {
+        alert(`${id}와 수립된 peerConnection이 없습니다!`);
+        return;
+      }
+      this.peerConnections[id].setRemoteDescription(answer);
+      console.log(this.peerConnections[id]);
     });
 
-    this.socket.on("ice", async ({ candidate }) => {
-      console.log("got ice");
+    this.socket.on("ice", async ({ candidate, id }) => {
+      console.log(`got ice from ${id}`);
       try {
-        await this.peerConnection.addIceCandidate(candidate);
+        await this.peerConnections[id].addIceCandidate(candidate);
       } catch (e) {
         console.log("adding Ice Candidate Failed!");
         console.error(e);
       }
     });
-  }
-
-  clearEvent() {
-    this.peerConnection.removeEventListener("icecandidate", this.handleIce);
-
-    this.peerConnection.removeEventListener("track", this.handleTrack);
   }
 
   appendChat({ prefix, chat }) {
@@ -283,6 +320,11 @@ class App extends Component {
   handleRoomSubmit(nextRoom) {
     const { room: prevRoom } = this.state;
     if (prevRoom) {
+      Object.values(this.peerConnections).forEach((peerConnection) =>
+        peerConnection.close()
+      );
+      this.peerConnections = [];
+      this.state.videos = [];
       this.socket.emit("leave_room", { room: prevRoom }, () => {
         console.log(`left Room: ${prevRoom}`);
         this.state.room = null;
@@ -293,8 +335,6 @@ class App extends Component {
       console.log(`entered Room: ${nextRoom}`);
       this.state.room = nextRoom;
     });
-
-    // this.peerConnections = [makeRTCPeerConnection([])];
   }
 
   handleChatSubmit(chat) {
