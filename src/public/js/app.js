@@ -359,8 +359,8 @@ class App extends Component {
       Object.values(this.peerConnections).forEach((peerConnection) =>
         peerConnection.close()
       );
-      this.peerConnections = [];
-      this.state.videos = [];
+      this.peerConnections = {};
+      this.state.state = { videos: [], chats: [] };
       this.socket.emit("leave_room", { room: prevRoom }, () => {
         console.log(`left Room: ${prevRoom}`);
         this.state.room = null;
