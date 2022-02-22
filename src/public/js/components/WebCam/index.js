@@ -28,7 +28,13 @@ class WebCam extends Component {
   #getCamera;
   #isMobile = isMobile();
 
-  constructor({ $target, initialState, onChangeStream }) {
+  constructor({
+    $target,
+    initialState,
+    onChangeStream,
+    onAudioToggled,
+    onVideoToggled,
+  }) {
     super({
       $target,
       initialState: {
@@ -62,7 +68,7 @@ class WebCam extends Component {
       },
       onClick: () => {
         $component.state.on = !$component.state.on;
-        $component.#getCamera();
+        onVideoToggled?.($component.state.on);
       },
     });
 
@@ -73,7 +79,7 @@ class WebCam extends Component {
       },
       onClick: () => {
         $component.state.muted = !$component.state.muted;
-        $component.#getCamera();
+        onAudioToggled?.($component.state.muted);
       },
     });
 
@@ -127,24 +133,19 @@ class WebCam extends Component {
     this.#getCamera = async () => {
       try {
         const { selectedVideoId, muted, on } = this.state;
-        if (muted && !on) {
-          const emptyStream = new MediaStream();
-          this.state.srcObject = emptyStream;
-          const tracks = emptyStream.getTracks();
-          onChangeStream?.({ stream: emptyStream, tracks });
-          return;
-        }
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: !muted,
-          video: on
-            ? this.#isMobile
-              ? { facingMode: selectedVideoId }
-              : { deviceId: selectedVideoId }
-            : false,
+        const stream = new MediaStream();
+
+        const userMediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: this.#isMobile
+            ? { facingMode: selectedVideoId }
+            : { deviceId: selectedVideoId },
+        });
+        userMediaStream.getTracks().forEach((track) => {
+          stream.addTrack(track);
         });
         this.state.srcObject = stream;
-        const tracks = stream.getTracks();
-        onChangeStream?.({ stream, tracks });
+        onChangeStream?.({ stream, muted, on });
       } catch (e) {
         console.error(e);
       }
