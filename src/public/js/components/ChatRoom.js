@@ -28,15 +28,15 @@ class ChatRoom extends Component {
   template() {
     const { chats } = this.state;
     const scrollTop = this.node.querySelector("ul")?.scrollTop ?? 0;
+    const isFocused =
+      document.activeElement === this.node.querySelector("input");
     requestAnimationFrame(() => {
       const $ul = this.node.querySelector("ul");
       if (!$ul) return;
       const { scrollHeight, clientHeight } = $ul;
-
       const isAllScrolled =
         Math.abs(scrollHeight - clientHeight - scrollTop) < 40; // li 한개 높이 정도
       const isLastChatMe = chats[chats.length - 1]?.startsWith("나 :");
-
       // rerender 되기 이전 position으로 스크롤 한다.
       $ul?.scrollBy({
         top: scrollTop,
@@ -50,6 +50,7 @@ class ChatRoom extends Component {
           left: 0,
           behavior: "smooth",
         });
+        isFocused && this.node.querySelector("input")?.focus();
       }
     });
 
