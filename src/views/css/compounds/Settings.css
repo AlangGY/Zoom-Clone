@@ -1,0 +1,33 @@
+.settings {
+  position: relative;
+  display: inline-flex;
+  padding: 5px;
+  padding-top: 25px;
+  margin-top: 24px;
+  background-color: rgb(250, 250, 250);
+  box-shadow: 0 2px 2px -2px black;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  width: 100%;
+  /* width: 500px; */
+}
+
+.settings .toggle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.settings p {
+  width: 200px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+}

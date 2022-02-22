@@ -1,12 +1,12 @@
 .videoList {
   padding: 10px;
   box-shadow: 0 1px 2px -1px black;
-  width: 450px;
+  width: 100%;
 }
 
 .videoList ul {
   display: grid;
-  grid-template-columns: repeat(2, 200px);
+  grid-template-columns: repeat(2, minmax(200px, auto));
   grid-auto-rows: 200px;
   gap: 5px;
   width: 100%;

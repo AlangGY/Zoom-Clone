@@ -1,13 +1,13 @@
 import Component from "./Component.template.js";
 import ChatRoom from "./components/ChatRoom.js";
-import FormCard from "./components/FormCard/index.js";
 import Header from "./components/Header.js";
 import RoomList from "./components/RoomList/index.js";
-// import Video from "./components/Video.js";
 import VideoList from "./components/VideoList.js";
 import WebCam from "./components/WebCam/index.js";
 import PrefixContent from "./components/PrefixContent.js";
 import webRTC from "./webRTC.js";
+import Settings from "./compounds/Settings.js";
+import Container from "./components/Container.js";
 
 // App
 
@@ -25,13 +25,12 @@ class App extends Component {
   audioTrack;
   videoTrack;
   #header;
-  #nicknameSpan;
-  #roomSpan;
-  #nicknameForm;
-  #roomForm;
+  #sideBar;
+  #settings;
   #roomList;
-  #chatRoom;
+  #camAndChat;
   #webCam;
+  #chatRoom;
   #videoList;
 
   constructor({ $target, initialState }) {
@@ -41,48 +40,17 @@ class App extends Component {
       initialState: { title: "알랑 채팅 방" },
     });
 
-    this.#nicknameSpan = new PrefixContent({
-      $target,
+    this.#sideBar = new Container({ $target, className: "sidebar" });
+    this.#settings = new Settings({
+      $target: this.#sideBar.node,
       initialState: {
-        prefix: "닉네임 : ",
-        text: this.state.nickname ?? "닉네임을 지어주세요",
-        block: true,
+        nickname: this.state.nickname,
       },
-    });
-
-    this.#roomSpan = new PrefixContent({
-      $target,
-      initialState: {
-        prefix: "참가한 방 : ",
-        text: this.state.room ?? "없음",
-        block: true,
-      },
-    });
-
-    this.#nicknameForm = new FormCard({
-      $target,
-      initialState: {
-        title: "닉네임 설정",
-        placeholder: "닉네임을 입력하세요",
-        text: "설정",
-        value: "",
-      },
-      onSubmit: (value) => {
+      onNicknameSubmit: (value) => {
         if (!value) return;
         this.handleNicknameSubmit(value);
-        this.#nicknameForm.state.value = "";
       },
-    });
-
-    this.#roomForm = new FormCard({
-      $target,
-      initialState: {
-        title: "방 참가",
-        placeholder: "방 제목을 입력하세요",
-        text: "참가 / 생성",
-        value: "",
-      },
-      onSubmit: (value) => {
+      onRoomSubmit: (value) => {
         if (!value) return;
         if (!this.state.nickname) {
           alert("닉네임을 먼저 설정해주세요!");
@@ -93,7 +61,7 @@ class App extends Component {
     });
 
     this.#roomList = new RoomList({
-      $target,
+      $target: this.#sideBar.node,
       initialState: {
         rooms: this.state.rooms,
         currentRoom: this.state.room,
@@ -103,20 +71,10 @@ class App extends Component {
       },
     });
 
-    this.#chatRoom = new ChatRoom({
-      $target,
-      initialState: {
-        chats: this.state.chats,
-        hidden: !!!this.state.room,
-      },
-      onSubmit: (value) => {
-        if (!value) return;
-        this.handleChatSubmit(value);
-      },
-    });
+    this.#camAndChat = new Container({ $target, className: "camAndChat" });
 
     this.#webCam = new WebCam({
-      $target,
+      $target: this.#camAndChat.node,
       initialState: {
         width: 200,
         height: 200,
@@ -193,6 +151,18 @@ class App extends Component {
       },
     });
 
+    this.#chatRoom = new ChatRoom({
+      $target: this.#camAndChat.node,
+      initialState: {
+        chats: this.state.chats,
+        hidden: !!!this.state.room,
+      },
+      onSubmit: (value) => {
+        if (!value) return;
+        this.handleChatSubmit(value);
+      },
+    });
+
     this.#videoList = new VideoList({
       $target,
       initialState: {
@@ -202,13 +172,12 @@ class App extends Component {
 
     this.children = [
       this.#header,
-      this.#nicknameSpan,
-      this.#roomSpan,
-      this.#nicknameForm,
-      this.#roomForm,
+      this.#sideBar,
+      this.#settings,
       this.#roomList,
-      this.#chatRoom,
+      this.#camAndChat,
       this.#webCam,
+      this.#chatRoom,
       this.#videoList,
     ];
 
@@ -246,8 +215,7 @@ class App extends Component {
 
   setChildrenState(state) {
     const { nickname, room, rooms, chats, videos } = state;
-    this.#nicknameSpan.state.text = nickname ?? "Unknown";
-    this.#roomSpan.state.text = room ?? "없음";
+    this.#settings.state.nickname = nickname;
     this.#roomList.state.state = { rooms, currentRoom: room };
     this.#chatRoom.state.state = { chats, hidden: !!!room };
     this.#videoList.state.videos = videos;

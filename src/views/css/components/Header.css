@@ -1,4 +1,9 @@
 .header {
+  grid-area: header;
+  align-self: center;
   font-size: 2em;
   text-align: center;
+  margin-top: 5px;
+  padding-bottom: 5px;
+  box-shadow: 0 2px 2px -2px black;
 }
