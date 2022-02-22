@@ -8,6 +8,10 @@ import FormCardTitle from "./FormCardTitle.js";
 const defaultState = { title: "", placeholder: "", text: "submit", value: "" };
 
 class FormCard extends Form {
+  #formCardTitle;
+  #inputContainer;
+  #input;
+  #button;
   constructor({ $target, initialState, onSubmit, className }) {
     super({
       $target,
@@ -20,35 +24,40 @@ class FormCard extends Form {
 
     const { title, placeholder, text, value } = this.state;
 
-    const $formCardTitle = new FormCardTitle({
+    this.#formCardTitle = new FormCardTitle({
       $target: this.node,
       initialState: { title },
     });
 
-    const $inputContainer = new Container({
+    this.#inputContainer = new Container({
       $target: this.node,
       className: "inputContainer",
     });
 
-    const $input = new Input({
-      $target: $inputContainer.node,
+    this.#input = new Input({
+      $target: this.#inputContainer.node,
       initialState: { placeholder, value, type: "text" },
       onInput: (value) => {
         this.state.value = value;
       },
     });
-    const $button = new Button({
-      $target: $inputContainer.node,
+    this.#button = new Button({
+      $target: this.#inputContainer.node,
       initialState: { text, type: "submit" },
     });
 
-    this.children = [$formCardTitle, $inputContainer, $input, $button];
+    this.children = [
+      this.#formCardTitle,
+      this.#inputContainer,
+      this.#input,
+      this.#button,
+    ];
 
     this.handleSubmit = (e) => {
       e.preventDefault();
       onSubmit?.(this.state.value);
       requestAnimationFrame(() => {
-        $input.node?.focus();
+        this.#input.node?.focus();
       });
     };
   }
