@@ -30,18 +30,22 @@ io.on("connection", (socket) => {
   sendRoomList();
   socket.on("enter_room", ({ room }, done) => {
     socket.join(room);
-    socket
-      .to(room)
-      .emit("announce", { type: "join", nickname: socket["__nickname"] });
+    socket.to(room).emit("announce", {
+      type: "join",
+      nickname: socket["__nickname"],
+      id: socket.id,
+    });
     sendRoomList();
 
     done?.();
   });
 
   socket.on("leave_room", ({ room }, done) => {
-    socket
-      .to(room)
-      .emit("announce", { type: "leave", nickname: socket["__nickname"] });
+    socket.to(room).emit("announce", {
+      type: "leave",
+      nickname: socket["__nickname"],
+      id: socket.id,
+    });
     socket.leave(room);
     sendRoomList();
 
@@ -52,9 +56,11 @@ io.on("connection", (socket) => {
     console.log("disconnecting");
     const rooms = getEnteredRoom([...socket.rooms], socket.id);
     if (!rooms.length) return;
-    socket
-      .to(rooms)
-      .emit("announce", { type: "leave", nickname: socket["__nickname"] });
+    socket.to(rooms).emit("announce", {
+      type: "leave",
+      nickname: socket["__nickname"],
+      id: socket.id,
+    });
   });
 
   socket.on("disconnect", () => {
@@ -77,16 +83,16 @@ io.on("connection", (socket) => {
     done?.();
   });
 
-  socket.on("offer", ({ offer, room }) => {
-    socket.to(room).emit("offer", { offer });
+  socket.on("offer", ({ offer, id }) => {
+    socket.to(id).emit("offer", { offer, id: socket.id });
   });
 
-  socket.on("answer", ({ answer, room }) => {
-    socket.to(room).emit("answer", { answer });
+  socket.on("answer", ({ answer, id }) => {
+    socket.to(id).emit("answer", { answer, id: socket.id });
   });
 
-  socket.on("ice", ({ candidate, room }) => {
-    socket.to(room).emit("ice", { candidate });
+  socket.on("ice", ({ candidate, id }) => {
+    socket.to(id).emit("ice", { candidate, id: socket.id });
   });
 });
 
