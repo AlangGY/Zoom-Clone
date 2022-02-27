@@ -4,6 +4,7 @@ import express from "express";
 import { getEnteredRoom, getPublicRooms } from "./libs/util/functions";
 
 const app = express();
+const PORT = process.env.PORT || 80;
 
 app.set("view engine", "pug");
 app.set("views", __dirname + "/views");
@@ -96,4 +97,4 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, handleListen);
+server.listen(PORT, handleListen);
