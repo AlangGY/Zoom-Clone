@@ -18,6 +18,8 @@ WebSocket을 Signaling Server로서 활용하여 WebRTC를 통해 브라우저�
 - render를 위한 상태 관리를 [flux 패턴](https://facebook.github.io/flux/docs/in-depth-overview/)으로 구현하여, 데이터의 흐름이 단방향으로 흐름에 따라, 보다 정확한 데이터에 따른 rendering과, 데이터 관리, 추적이 수월합니다.
 - [옵저버 패턴](https://refactoring.guru/design-patterns/observer)을 구현하기 위해, JavaScript의 Proxy 객체를 활용하였습니다. 이는 React 보다는 Vue의 상태관리 방식에 가까우며, state의 프로퍼티를 변경함에 따라 변화된 데이터로 render()메소드와 setChildState() 메소드를 호출 시키도록 자동화 시켰습니다.
 
+## [지식 WIKI](https://github.com/AlangGY/Zoom-Clone/wiki)
+
 ## 📄로컬에서 테스트 하기
 
 - Repository Clone 후,
